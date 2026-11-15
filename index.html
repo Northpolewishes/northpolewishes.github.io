@@ -205,6 +205,13 @@ async function rpc(fn, args){
   if(!r.ok) throw new Error('Network trouble at the North Pole. Try again.');
   return r.json();
 }
+function familyLink(code){ return location.origin + location.pathname + '#' + code; }
+async function shareFamily(code, name){
+  const url = familyLink(code);
+  const text = `Write to Santa at the North Pole Wish Station! Our family code is ${code}.`;
+  try{ if(navigator.share){ await navigator.share({title:'North Pole Wish Station', text, url}); return; } }catch(e){ if(e && e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(`${text} ${url}`); toast('Link copied! Paste it in a text.'); }catch(e){ toast(url); }
+}
 function toast(msg){
   const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
   document.body.appendChild(t); setTimeout(()=>t.remove(), 2600);
@@ -445,13 +452,13 @@ function codeView(code){
     <h2>You're on the Nice List!</h2>
     <p>Your family code is:</p>
     <div class="codebox">${esc(code)}</div>
-    <p>Save it. Share it with anyone in your family who helps the kids write. Keep your PIN private.</p>
+    <p>Send the family link to anyone who helps the kids write. Tapping it opens your family right away. Keep your PIN private.</p>
     <div class="stack">
-      <button class="btn gold block" id="copyCode">Copy Code</button>
+      <button class="btn gold block" id="shareLink">Share Family Link</button>
       <button class="btn green block" id="go">Start Writing to Santa</button>
     </div>
   </div>`);
-  $('#copyCode').onclick = async ()=>{ try{ await navigator.clipboard.writeText(code); toast('Code copied!'); }catch(e){ toast('Write it down: '+code); } };
+  $('#shareLink').onclick = ()=>shareFamily(code);
   $('#go').onclick = ()=>openFamily(code);
 }
 
@@ -593,7 +600,7 @@ function parentView(keepScroll){
       <form id="addKid" class="row"><input type="text" id="newKid" maxlength="30" placeholder="Add a child"><button class="btn green" type="submit">Add</button></form>
     </div>
     <div class="stack" style="margin-top:18px">
-      <button class="btn gold block" id="copyCode">Copy Family Code (${esc(state.code)})</button>
+      <button class="btn gold block" id="shareLink">Share Family Link (${esc(state.code)})</button>
       <button class="btn block" id="lock">Lock and Return to Kids</button>
     </div>
   </div>`;
@@ -611,7 +618,7 @@ function parentView(keepScroll){
     const r = await rpc('np_parent_add_kid', {p_code:state.code, p_pin:state.pin, p_name:n});
     if(r.error) return toast(r.error==='too_many'?'10 kids max':'Check the name');
     state.family = await rpc('np_get_family',{p_code:state.code}); await refreshParent(); toast(n+' added!'); };
-  $('#copyCode').onclick = async ()=>{ try{ await navigator.clipboard.writeText(state.code); toast('Code copied!'); }catch(e){ toast('Code: '+state.code); } };
+  $('#shareLink').onclick = ()=>shareFamily(state.code);
   $('#lock').onclick = async ()=>{ state.pin=null; state.parent=null; state.family = await rpc('np_get_family',{p_code:state.code}); familyView(); };
 }
 
@@ -625,7 +632,14 @@ function confirmBox(msg, onYes){
 }
 
 /* ---------- start ---------- */
-if(state.code) openFamily(state.code).then(()=>{ if(!state.family) homeView(); }); else homeView();
+(function start(){
+  const h = (location.hash||'').replace('#','').trim().toUpperCase();
+  if(/^[A-Z0-9]{6}$/.test(h)){
+    state.code = h;
+    try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  }
+  if(state.code) openFamily(state.code).then(()=>{ if(!state.family) homeView(); }); else homeView();
+})();
 </script>
 </body>
 </html>
