@@ -159,6 +159,15 @@ input:focus{border-color:var(--green)}
 .lang-sw{display:flex;justify-content:center;gap:0;margin:0 auto 6px;width:max-content;border:3px solid var(--gold);border-radius:999px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 .lang-sw button{font:inherit;font-weight:700;font-size:1rem;border:0;padding:8px 18px;cursor:pointer;background:rgba(11,26,58,.7);color:#fff}
 .lang-sw button.on{background:var(--gold);color:var(--ink)}
+.gift-wrap{animation:pop .6s ease-out}
+.gift-wrap #giftLid{transition:transform .8s cubic-bezier(.3,1.6,.5,1);transform-origin:100px 60px}
+.gift-wrap.open #giftLid{transform:translate(40px,-90px) rotate(35deg)}
+.gift-wrap.open{animation:shake .4s 2}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.reveal-name{font-family:'Mountains of Christmas',cursive;font-weight:700;font-size:clamp(3rem,14vw,5rem);color:#fff;
+  text-shadow:0 0 24px rgba(245,197,66,.9),0 4px 0 var(--red-d);animation:pop .7s cubic-bezier(.2,1.5,.4,1) both;line-height:1.1;margin:6px 0}
+.sel{font:inherit;font-size:1rem;padding:10px;border-radius:12px;border:3px solid #e2c98f;background:#fff;color:var(--ink);flex:1;min-width:110px}
+.overlay .bubble ul{font-weight:500}
 @media (prefers-reduced-motion:reduce){.bulb,#santaArm,.santa-body,#santaEyes{animation:none}}
 </style>
 </head>
@@ -210,9 +219,9 @@ async function rpc(fn, args){
   return r.json();
 }
 function familyLink(code){ return location.origin + location.pathname + '#' + code + (LANG==='es' ? '-es' : ''); }
-async function shareFamily(code, name){
+async function shareFamily(code, key){
   const url = familyLink(code);
-  const text = t('shareText',{code});
+  const text = t(key || 'shareText',{code});
   try{ if(navigator.share){ await navigator.share({title:t('docTitle'), text, url}); return; } }catch(e){ if(e && e.name==='AbortError') return; }
   try{ await navigator.clipboard.writeText(`${text} ${url}`); toast(t('linkCopied')); }catch(e){ toast(url); }
 }
@@ -284,6 +293,72 @@ es: {
   envelope:'Para: Santa, Polo Norte', fallbackSpeech:'¡Jo jo jo! ¡Gracias por tu carta, {name}! ¡Feliz Navidad!',
   speechLang:'es-MX', dateLocale:'es-MX'
 }};
+Object.assign(I18N.en, {
+  grownupLists:'Grown-up Lists', secretSanta:'Secret Santa', lock:'Lock', save:'Save', saved:'Saved!', pinChanged:'PIN changed!',
+  adultsSub:"Each grown-up gets a private list. Only your partner can see it.", noAdults:'No grown-ups yet. Add yourself first.',
+  addAdult:'+ Add a grown-up', addAdultTitle:'Add a Grown-up', familyPinNeeded:'Family PIN (the parent PIN)',
+  adultName:'Your name', adultPin:'Your own PIN (4 to 6 numbers)', adultPinPh:'Not the family PIN', enterYourPin:'Enter your PIN, {name}.',
+  myList:'My Wish List', myListSub:"Your partner sees this. You'll never see what they bought.", dearSantaAdult:'Dear Santa, this year I deserve...',
+  sendAdult:'Send It to Santa', partnerLabel:'My partner', noPartner:'No partner picked',
+  partnerWaiting:"Waiting for {name} to pick you back. Once you both pick each other, you'll see each other's lists.",
+  partnerList:"{name}'s List", partnerListSub:'Check off what you bought. {name} will never see this.', noAdultWishes:'Nothing on the list yet.',
+  manageAdults:'Grown-ups', resetPinFor:'New PIN for {name}', resetPin:'Reset PIN',
+  ssCardText:'Draw names for family, friends or work. Everyone gets a secret person.', ssStart:'Start a Secret Santa',
+  ssEnterCode:'Have a group code? Enter it here.', ssCreateTitle:'Start a Secret Santa', ssGroupName:'Group name', ssGroupPh:'The Office Exchange',
+  ssOrgName:'Your name (organizer)', ssBudget:'Budget (optional)', ssBudgetPh:'$50', ssDate:'Exchange date (optional)',
+  ssOrgPin:'Organizer PIN (4 to 6 numbers)', ssCreateBtn:'Create the Group', ssCreated:'Your Secret Santa is ready!', ssGroupCode:'Group code:',
+  ssShareHelp:'Send the group link to everyone playing. They tap it, add their name, and pick their own PIN.',
+  ssShareLink:'Share Group Link', ssJoinMyself:'Join as a Player', ssOrgTools:'Organizer Tools',
+  ssBudgetLabel:'Budget: {b}', ssDateLabel:'Exchange: {d}', ssPlayers:'{n} players', ssWhoAreYou:'Already joined? Tap your name.',
+  ssNew:"I'm new, add me", ssLeave:'Not your group? Switch', ssClosed:'Sign-ups are closed. Ask the organizer if you need in.',
+  ssJoinTitle:'Join {group}', ssYourName:'Your name', ssYourPin:'Pick a PIN (4 to 6 numbers)', ssJoinBtn:'Join the Fun',
+  errNameTaken:'That name is taken. Add a last initial.', ssHi:'Hi, {name}!', ssMyWishes:'My wish list', ssWishHelp:'Whoever draws you will see this list.',
+  ssNotDrawn:"Names haven't been drawn yet. Check back soon!", ssRevealBtn:'Reveal My Person!', ssYouGot:'You got...', ssTheirList:'Their wish list',
+  ssNoList:"They haven't added a list yet. Check back later.", ssShh:'Shh! Keep it secret.', ssShowAgain:'Show My Person', ssUnwrap:'Unwrapping...',
+  orgBlind:"You can't see who drew who, so you can play too.", orgPlayers:'Players', orgOpened:'opened', orgNotOpened:'not opened',
+  orgWishCount:'{n} wishes', orgRemove:'Remove', orgRules:'Rules', orgCouples:"Couples (can't draw each other)",
+  orgLastYear:"Last year (can't get the same person again)", orgAdd:'Add', orgGaveTo:'gave to', orgAnd:'and', orgPick:'Pick...',
+  orgSettings:'Settings', orgLockSignups:'Close sign-ups', orgDraw:'Draw Names!', orgRedraw:'Redraw Names',
+  orgDrawn:'Names are drawn. {r} of {n} have opened their person.', orgDrawConfirm:'Draw names now? Sign-ups will close.',
+  orgNewRound:'Start Next Year', orgNewRoundConfirm:"Start a new year? This year's pairs become last-year rules, and everyone's lists are cleared.",
+  errTooFew:'You need at least 3 players.', errImpossible:'No draw fits these rules. Remove a rule or add players.',
+  errAlreadyRevealed:"Someone already opened their person, so you can't redraw.", errDrawn:'Names are already drawn.',
+  ssShareText:'Join our Secret Santa! Tap the link, add your name, and pick a PIN. Group code: {code}.', ssRemoveConfirm:'Remove {name}?',
+  drawnToast:'Names drawn! Tell everyone to open their person.'
+});
+Object.assign(I18N.es, {
+  grownupLists:'Listas de Adultos', secretSanta:'Amigo Secreto', lock:'Bloquear', save:'Guardar', saved:'¡Guardado!', pinChanged:'¡PIN cambiado!',
+  adultsSub:'Cada adulto tiene una lista privada. Solo tu pareja puede verla.', noAdults:'Todavía no hay adultos. Agrégate primero.',
+  addAdult:'+ Agregar un adulto', addAdultTitle:'Agregar un Adulto', familyPinNeeded:'PIN de la familia (el PIN de papás)',
+  adultName:'Tu nombre', adultPin:'Tu propio PIN (4 a 6 números)', adultPinPh:'No el PIN de la familia', enterYourPin:'Escribe tu PIN, {name}.',
+  myList:'Mi Lista de Deseos', myListSub:'Tu pareja ve esta lista. Tú nunca verás lo que compró.', dearSantaAdult:'Querido Santa, este año me merezco...',
+  sendAdult:'Mandársela a Santa', partnerLabel:'Mi pareja', noPartner:'Sin pareja elegida',
+  partnerWaiting:'Esperando a que {name} también te elija. Cuando se elijan los dos, podrán ver la lista del otro.',
+  partnerList:'Lista de {name}', partnerListSub:'Marca lo que ya compraste. {name} nunca lo verá.', noAdultWishes:'Todavía no hay nada en la lista.',
+  manageAdults:'Adultos', resetPinFor:'Nuevo PIN para {name}', resetPin:'Cambiar PIN',
+  ssCardText:'Sorteen nombres en familia, con amigos o en el trabajo. A cada quien le toca alguien en secreto.', ssStart:'Empezar un Amigo Secreto',
+  ssEnterCode:'¿Tienes un código de grupo? Escríbelo aquí.', ssCreateTitle:'Empezar un Amigo Secreto', ssGroupName:'Nombre del grupo', ssGroupPh:'Intercambio de la Oficina',
+  ssOrgName:'Tu nombre (organizador)', ssBudget:'Presupuesto (opcional)', ssBudgetPh:'$50', ssDate:'Fecha del intercambio (opcional)',
+  ssOrgPin:'PIN del organizador (4 a 6 números)', ssCreateBtn:'Crear el Grupo', ssCreated:'¡Tu Amigo Secreto está listo!', ssGroupCode:'Código del grupo:',
+  ssShareHelp:'Manda el enlace del grupo a todos los que van a jugar. Lo tocan, escriben su nombre y eligen su propio PIN.',
+  ssShareLink:'Compartir Enlace del Grupo', ssJoinMyself:'Unirme como Jugador', ssOrgTools:'Herramientas del Organizador',
+  ssBudgetLabel:'Presupuesto: {b}', ssDateLabel:'Intercambio: {d}', ssPlayers:'{n} jugadores', ssWhoAreYou:'¿Ya te uniste? Toca tu nombre.',
+  ssNew:'Soy nuevo, agrégame', ssLeave:'¿No es tu grupo? Cambiar', ssClosed:'Las inscripciones están cerradas. Pregúntale al organizador.',
+  ssJoinTitle:'Unirse a {group}', ssYourName:'Tu nombre', ssYourPin:'Elige un PIN (4 a 6 números)', ssJoinBtn:'Unirme',
+  errNameTaken:'Ese nombre ya está. Agrega la inicial de tu apellido.', ssHi:'¡Hola, {name}!', ssMyWishes:'Mi lista de deseos', ssWishHelp:'Quien te saque verá esta lista.',
+  ssNotDrawn:'Todavía no se sortean los nombres. ¡Vuelve pronto!', ssRevealBtn:'¡Ver a Quién Me Tocó!', ssYouGot:'Te tocó...', ssTheirList:'Su lista de deseos',
+  ssNoList:'Todavía no agrega su lista. Vuelve más tarde.', ssShh:'¡Shh! Es secreto.', ssShowAgain:'Ver a Quién Me Tocó', ssUnwrap:'Abriendo...',
+  orgBlind:'Tú no puedes ver quién le tocó a quién, así que también puedes jugar.', orgPlayers:'Jugadores', orgOpened:'ya vio', orgNotOpened:'no ha visto',
+  orgWishCount:'{n} deseos', orgRemove:'Quitar', orgRules:'Reglas', orgCouples:'Parejas (no se pueden tocar entre sí)',
+  orgLastYear:'El año pasado (no le puede tocar la misma persona)', orgAdd:'Agregar', orgGaveTo:'le regaló a', orgAnd:'y', orgPick:'Elegir...',
+  orgSettings:'Ajustes', orgLockSignups:'Cerrar inscripciones', orgDraw:'¡Sortear Nombres!', orgRedraw:'Volver a Sortear',
+  orgDrawn:'Ya se sortearon los nombres. {r} de {n} ya vieron a quién les tocó.', orgDrawConfirm:'¿Sortear nombres ahora? Se cerrarán las inscripciones.',
+  orgNewRound:'Empezar el Próximo Año', orgNewRoundConfirm:'¿Empezar un año nuevo? Las parejas de este año se vuelven reglas, y se borran las listas.',
+  errTooFew:'Necesitas al menos 3 jugadores.', errImpossible:'Ningún sorteo cumple estas reglas. Quita una regla o agrega jugadores.',
+  errAlreadyRevealed:'Alguien ya vio a quién le tocó, así que no se puede volver a sortear.', errDrawn:'Los nombres ya se sortearon.',
+  ssShareText:'¡Únete a nuestro Amigo Secreto! Toca el enlace, escribe tu nombre y elige un PIN. Código: {code}.', ssRemoveConfirm:'¿Quitar a {name}?',
+  drawnToast:'¡Nombres sorteados! Diles a todos que vean a quién les tocó.'
+});
 let LANG = (store.get('np_lang') || ((navigator.language||'').toLowerCase().startsWith('es') ? 'es' : 'en'));
 function t(k, vars){ let s = (I18N[LANG]||I18N.en)[k] ?? I18N.en[k] ?? k; if(vars) for(const v in vars) s = s.split('{'+v+'}').join(vars[v]); return s; }
 let rerender = () => {};
@@ -401,21 +476,37 @@ function jingle(){
   }
 }
 const voiceCache = {};
-function fetchVoice(kid){
-  const ck = kid.id + ':' + LANG;
-  if(voiceCache[ck]) return voiceCache[ck];
-  voiceCache[ck] = fetch(`${SB}/functions/v1/santa-voice`, {
-    method:'POST', headers:{apikey:KEY,'Content-Type':'application/json'}, body:JSON.stringify({code:state.code, kid_id:kid.id, lang:LANG})
+// req = { key, body, fallback }
+function fetchVoice(req){
+  if(voiceCache[req.key]) return voiceCache[req.key];
+  voiceCache[req.key] = fetch(`${SB}/functions/v1/santa-voice`, {
+    method:'POST', headers:{apikey:KEY,'Content-Type':'application/json'}, body:JSON.stringify(Object.assign({code:state.code, lang:LANG}, req.body))
   }).then(r=>r.json()).then(j=>{ if(!j.url) throw new Error(j.error||'no voice'); return fetch(j.url); })
-    .then(r=>r.arrayBuffer()).catch(e=>{ delete voiceCache[ck]; throw e; });
-  return voiceCache[ck];
+    .then(r=>r.arrayBuffer()).catch(e=>{ delete voiceCache[req.key]; throw e; });
+  return voiceCache[req.key];
 }
-let lastBuffer = null;
-async function playSanta(kid){
+const kidVoice = kid => ({ key:'k:'+kid.id+':'+LANG, body:{kid_id:kid.id}, fallback:t('fallbackSpeech',{name:kid.name}) });
+const ADULT_LINES = {
+  en: ["Hell yeah, {name}! Got your list. The elves are already fighting over who gets to build it.",
+       "Well, well, {name}. Bold choices. I respect it.",
+       "Ho ho holy moly, {name}. Mrs. Claus is gonna want one of those.",
+       "List received, {name}. Naughty or nice? Honestly, I stopped checking on grown-ups years ago.",
+       "Damn, {name}, you came prepared. The sleigh's gonna need a bigger trunk."],
+  es: ["¡Órale, {name}! Ya tengo tu lista. Los duendes ya se están peleando por quién la arma.",
+       "Vaya, vaya, {name}. Qué lista tan atrevida. La respeto.",
+       "¡Jo, jo, jo, qué barbaridad, {name}! La señora Claus va a querer uno de esos.",
+       "Lista recibida, {name}. ¿Te portaste bien o mal? La verdad, hace años que dejé de revisar a los adultos.",
+       "¡Demonios, {name}, esa lista viene con todo! Voy a necesitar un trineo más grande."]
+};
+const adultLine = (line, name, html) => ADULT_LINES[LANG][line].split('{name}').join(html ? `<b>${esc(name)}</b>` : name);
+const adultVoice = (adult, line) => ({ key:'a:'+adult.id+':'+LANG+':'+line, body:{adult_id:adult.id, line}, fallback:adultLine(line, adult.name) });
+let lastBuffer = null, lastKey = null;
+async function playSanta(req){
   const wrap = $('.santa-wrap'); const mouth = document.getElementById('santaMouth');
   const talk = on => { if(wrap) wrap.classList.toggle('talking', on); };
+  if(lastKey !== req.key){ lastBuffer = null; lastKey = req.key; }
   try{
-    if(!lastBuffer){ const ab = await fetchVoice(kid); lastBuffer = await actx.decodeAudioData(ab.slice(0)); }
+    if(!lastBuffer){ const ab = await fetchVoice(req); lastBuffer = await actx.decodeAudioData(ab.slice(0)); }
     const src = actx.createBufferSource(); src.buffer = lastBuffer;
     const an = actx.createAnalyser(); an.fftSize = 256; src.connect(an); an.connect(actx.destination);
     const data = new Uint8Array(an.frequencyBinCount); let playing = true;
@@ -427,7 +518,7 @@ async function playSanta(kid){
   }catch(e){
     // fallback: device voice
     try{
-      const u = new SpeechSynthesisUtterance(t('fallbackSpeech',{name:kid.name}));
+      const u = new SpeechSynthesisUtterance(req.fallback);
       u.lang = t('speechLang'); u.pitch = 0.5; u.rate = 0.85; talk(true); u.onend = ()=>talk(false); speechSynthesis.speak(u);
     }catch(_){}
   }
@@ -447,7 +538,86 @@ function burst(){
 /* ---------- views ---------- */
 const view = $('#view');
 function setView(html){ view.innerHTML = html; window.scrollTo({top: 0, behavior:'smooth'}); }
+const fmtDay = d => new Date(d + (String(d).length===10 ? 'T12:00:00' : '')).toLocaleDateString(t('dateLocale'),{month:'short',day:'numeric'});
 
+/* ----- shared bits ----- */
+function pinPad({title, sub, onSubmit, back}){
+  let pin='';
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>${title}</h2>
+    <p>${sub}</p>
+    <div class="dots" id="dots"></div>
+    <div class="err" id="pinErr"></div>
+    <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-k="${n}">${n}</button>`).join('')}
+      <button data-k="back" aria-label="Delete">⌫</button><button data-k="0">0</button><button data-k="go" class="go" aria-label="OK">✓</button></div>
+    <p><button class="link" id="back">${t('back')}</button></p>
+  </div>`);
+  const dots = () => { $('#dots').innerHTML = Array.from({length:Math.max(4,pin.length)},(_,i)=>`<span class="dot ${i<pin.length?'on':''}"></span>`).join(''); };
+  dots();
+  const submit = async () => {
+    if(pin.length<4) return;
+    try{
+      const err = await onSubmit(pin);
+      if(err){ $('#pinErr').textContent = err==='locked' ? t('locked') : t('wrongPin'); pin=''; dots(); }
+    }catch(e){ const el=$('#pinErr'); if(el) el.textContent = t('network'); }
+  };
+  $('#pad').onclick = e => { const k = e.target.closest('button')?.dataset.k; if(!k) return;
+    if(k==='back') pin=pin.slice(0,-1); else if(k==='go') return submit(); else if(pin.length<6) pin+=k;
+    $('#pinErr').textContent=''; dots(); };
+  $('#back').onclick = back;
+}
+
+function confirmBox(msg, onYes){
+  const m = document.createElement('div'); m.className='modal';
+  m.innerHTML = `<div class="card center"><p style="font-size:1.2rem;font-weight:600">${esc(msg)}</p>
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="no">${t('cancel')}</button><button class="btn" id="yes">${t('yes')}</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelector('#no').onclick = ()=>m.remove();
+  m.querySelector('#yes').onclick = async ()=>{ m.remove(); try{ await onYes(); }catch(e){ toast(t('somethingWrong')); } };
+}
+
+function pinPrompt(msg, onPin){
+  const m = document.createElement('div'); m.className='modal';
+  m.innerHTML = `<div class="card center"><p style="font-size:1.15rem;font-weight:600">${esc(msg)}</p>
+    <input type="tel" inputmode="numeric" maxlength="6" id="pp" autocomplete="off">
+    <div class="err" id="ppErr"></div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn ghost" id="no">${t('cancel')}</button><button class="btn green" id="yes">${t('save')}</button></div></div>`;
+  document.body.appendChild(m); m.querySelector('#pp').focus();
+  m.querySelector('#no').onclick = ()=>m.remove();
+  m.querySelector('#yes').onclick = async ()=>{ const v = m.querySelector('#pp').value.trim();
+    if(!/^\d{4,6}$/.test(v)){ m.querySelector('#ppErr').textContent = t('errPin'); return; }
+    m.remove(); try{ await onPin(v); }catch(e){ toast(t('somethingWrong')); } };
+}
+
+function santaScene({bubble, voice, back}){
+  rerender = () => {};
+  const ov = $('#overlay'); ov.classList.remove('hidden');
+  ov.innerHTML = `<div class="envelope seal" id="env">${envelopeSvg()}</div><div class="ov-text">${t('sealing')}</div>`;
+  setTimeout(()=>{ $('.ov-text').textContent=t('whoosh'); jingle(); $('#env').classList.add('fly'); }, 1300);
+  setTimeout(()=>{
+    ov.innerHTML = `<div class="santa-wrap">${SANTA}</div>
+      <div class="bubble">${bubble}</div>
+      <div class="ov-actions"><button class="btn gold" id="again">${t('hearAgain')}</button><button class="btn green" id="done">${t('backLetter')}</button></div>`;
+    burst(); playSanta(voice);
+    $('#again').onclick = ()=>{ unlockAudio(); playSanta(voice); };
+    $('#done').onclick = ()=>{ ov.classList.add('hidden'); ov.innerHTML=''; back(); };
+  }, 3000);
+}
+
+// pending-wish list: returns {render, items}
+function pendingList(listEl, sendBtn, items){
+  const render = () => {
+    listEl.querySelectorAll('li.pending').forEach(li=>li.remove());
+    items.forEach((p,i)=>{ const li=document.createElement('li'); li.className='pending';
+      li.innerHTML=`<span class="star">✦</span>${esc(p)}<button class="x" aria-label="X">✕</button>`;
+      li.querySelector('.x').onclick=()=>{ items.splice(i,1); render(); }; listEl.appendChild(li); });
+    if(sendBtn) sendBtn.disabled = items.length===0;
+  };
+  render(); return render;
+}
+
+/* ----- home / routing ----- */
 function homeView(){
   rerender = homeView;
   state.kid=null; state.pin=null; state.parent=null;
@@ -465,25 +635,35 @@ function homeView(){
     <h2>${t('newFamily')}</h2>
     <p>${t('newFamilyText')}</p>
     <button class="btn gold" id="toSetup">${t('setupBtn')}</button>
+  </div>
+  <div class="card center">
+    <h2>${t('secretSanta')}</h2>
+    <p>${t('ssCardText')}</p>
+    <button class="btn" id="toSS">${t('ssStart')}</button>
   </div>`);
   $('#codeForm').onsubmit = async e => { e.preventDefault();
     const c = $('#codeIn').value.trim().toUpperCase(); if(c.length!==6){ $('#codeErr').textContent=t('codeLen'); return; }
-    await openFamily(c, $('#codeErr'));
+    await openCode(c, $('#codeErr'));
   };
   $('#toSetup').onclick = setupView;
+  $('#toSS').onclick = ssCreateView;
 }
 
-async function openFamily(code, errEl){
+async function openCode(code, errEl){
   try{
     if(errEl) errEl.textContent='';
     const fam = await rpc('np_get_family', {p_code: code});
-    if(!fam){ if(errEl) errEl.textContent = t('codeNotFound'); return; }
-    state.code = code; state.family = fam; store.set('np_code', code); familyView();
-  }catch(e){ if(errEl) errEl.textContent = t('network'); }
+    if(fam){ state.code = code; state.family = fam; store.set('np_code', code); familyView(); return true; }
+    const grp = await rpc('ss_get_group', {p_code: code});
+    if(grp){ state.ssCode = code; state.group = grp; store.set('np_ss', code); await groupView(); return true; }
+    if(errEl) errEl.textContent = t('codeNotFound');
+    return false;
+  }catch(e){ if(errEl) errEl.textContent = t('network'); return false; }
 }
+const openFamily = openCode;
 
+/* ----- family setup ----- */
 function setupView(){
-  // keep anything already typed when the language flips
   const keep = id => { const el = document.getElementById(id); return el ? el.value : ''; };
   const prev = { f:keep('fName'), p:keep('pName'), kids:[...document.querySelectorAll('.kidName')].map(i=>i.value) };
   rerender = setupView;
@@ -544,9 +724,10 @@ function codeView(code){
     </div>
   </div>`);
   $('#shareLink').onclick = ()=>shareFamily(code);
-  $('#go').onclick = ()=>openFamily(code);
+  $('#go').onclick = ()=>openCode(code);
 }
 
+/* ----- kids ----- */
 function familyView(){
   rerender = familyView;
   const f = state.family;
@@ -555,13 +736,19 @@ function familyView(){
     <h2>${esc(f.family_name)}</h2>
     <p style="font-size:1.2rem">${t('whoWriting')}</p>
     <div class="kids">${f.kids.map((k,i)=>`<button class="kid" data-i="${i}">${ornament(k.name,i)}<b>${esc(k.name)}</b></button>`).join('')}</div>
-    <div class="parent-door">
+    <div class="parent-door stack">
+      <div class="row" style="justify-content:center;flex-wrap:wrap">
+        <button class="btn gold" id="toAdults">${t('grownupLists')}</button>
+        <button class="btn" id="toSS">${t('secretSanta')}</button>
+      </div>
       <button class="btn ghost" id="toParent">${t('grownups')}</button>
     </div>
     <p><button class="link" id="switch">${t('switchFam')}</button></p>
   </div>`);
   view.querySelectorAll('.kid').forEach(b => b.onclick = () => { unlockAudio(); letterView(f.kids[+b.dataset.i]); });
   $('#toParent').onclick = pinView;
+  $('#toAdults').onclick = adultsView;
+  $('#toSS').onclick = async () => { const s = store.get('np_ss'); if(s && await openCode(s)) return; ssStartView(); };
   $('#switch').onclick = ()=>{ store.del('np_code'); state.code=null; homeView(); };
 }
 
@@ -569,8 +756,9 @@ async function letterView(kid){
   const pendingKeep = state.kid && state.kid.id === kid.id ? state.pending : [];
   const draft = ($('#wishIn')||{}).value || '';
   rerender = () => letterView(kid);
-  state.kid = kid; state.pending = pendingKeep; lastBuffer = null;
-  fetchVoice(kid).catch(()=>{}); // warm up Santa's voice
+  state.kid = kid; state.pending = pendingKeep;
+  const voice = kidVoice(kid);
+  fetchVoice(voice).catch(()=>{}); // warm up Santa's voice
   if(!view.querySelector('.paper')) setView(`<div class="spinner"></div>`);
   let wishes = [];
   try{ wishes = await rpc('np_kid_wishes', {p_code:state.code, p_kid_id:kid.id}); }catch(e){}
@@ -592,17 +780,10 @@ async function letterView(kid){
     <button class="btn cane block" id="sendBtn" disabled><span>${t('send')}</span></button>
     <p class="center"><button class="link" id="back" style="color:var(--green)">${t('back')}</button></p>
   </div>`);
-  const wl = $('#wl'), sendBtn = $('#sendBtn');
-  const renderPending = () => {
-    wl.querySelectorAll('li.pending').forEach(li=>li.remove());
-    state.pending.forEach((p,i)=>{ const li=document.createElement('li'); li.className='pending';
-      li.innerHTML=`<span class="star">✦</span>${esc(p)}<button class="x" aria-label="X">✕</button>`;
-      li.querySelector('.x').onclick=()=>{ state.pending.splice(i,1); renderPending(); }; wl.appendChild(li); });
-    sendBtn.disabled = state.pending.length===0;
-  };
-  renderPending();
+  const sendBtn = $('#sendBtn');
+  const renderPending = pendingList($('#wl'), sendBtn, state.pending);
   $('#wishForm').onsubmit = e => { e.preventDefault(); const v=$('#wishIn').value.trim();
-    if(!v) return; if(state.pending.length>=20) return; state.pending.push(v); $('#wishIn').value=''; renderPending(); $('#wishIn').focus(); };
+    if(!v || state.pending.length>=20) return; state.pending.push(v); $('#wishIn').value=''; renderPending(); $('#wishIn').focus(); };
   $('#back').onclick = ()=>{ state.kid=null; state.pending=[]; familyView(); };
   sendBtn.onclick = async () => {
     const extra = $('#wishIn').value.trim(); if(extra){ state.pending.push(extra); $('#wishIn').value=''; }
@@ -611,55 +792,20 @@ async function letterView(kid){
     try{
       const r = await rpc('np_add_wishes', {p_code:state.code, p_kid_id:kid.id, p_items:state.pending});
       if(r.error) throw new Error(t('errNoKid'));
-      state.pending = [];
-      sendAnimation(kid);
+      state.pending.length = 0;
+      santaScene({ bubble: t('santaSays',{name:esc(kid.name)}), voice, back: ()=>letterView(kid) });
     }catch(e){ $('#sendErr').textContent = e.message; sendBtn.disabled=false; }
   };
 }
 
-function sendAnimation(kid){
-  rerender = () => {};
-  const ov = $('#overlay'); ov.classList.remove('hidden');
-  ov.innerHTML = `<div class="envelope seal" id="env">${envelopeSvg()}</div><div class="ov-text">${t('sealing')}</div>`;
-  setTimeout(()=>{ $('.ov-text').textContent=t('whoosh'); jingle(); $('#env').classList.add('fly'); }, 1300);
-  setTimeout(()=>{
-    ov.innerHTML = `<div class="santa-wrap">${SANTA}</div>
-      <div class="bubble">${t('santaSays',{name:esc(kid.name)})}</div>
-      <div class="ov-actions"><button class="btn gold" id="again">${t('hearAgain')}</button><button class="btn green" id="done">${t('backLetter')}</button></div>`;
-    burst(); playSanta(kid);
-    $('#again').onclick = ()=>{ unlockAudio(); playSanta(kid); };
-    $('#done').onclick = ()=>{ ov.classList.add('hidden'); ov.innerHTML=''; letterView(kid); };
-  }, 3000);
-}
-
-/* ---------- parent ---------- */
+/* ----- parent (family PIN) ----- */
 function pinView(){
   rerender = pinView;
-  let pin='';
-  setView(`
-  <div class="card center">${HOLLY}
-    <h2>${t('grownups')}</h2>
-    <p>${t('enterPin')}</p>
-    <div class="dots" id="dots"></div>
-    <div class="err" id="pinErr"></div>
-    <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-k="${n}">${n}</button>`).join('')}
-      <button data-k="back" aria-label="Delete">⌫</button><button data-k="0">0</button><button data-k="go" class="go" aria-label="OK">✓</button></div>
-    <p><button class="link" id="back">${t('back')}</button></p>
-  </div>`);
-  const dots = () => { $('#dots').innerHTML = Array.from({length:Math.max(4,pin.length)},(_,i)=>`<span class="dot ${i<pin.length?'on':''}"></span>`).join(''); };
-  dots();
-  const submit = async () => {
-    if(pin.length<4) return;
-    try{
-      const r = await rpc('np_parent_view', {p_code:state.code, p_pin:pin});
-      if(r.error){ $('#pinErr').textContent = r.error==='locked' ? t('locked') : t('wrongPin'); pin=''; dots(); return; }
-      state.pin = pin; state.parent = r; parentView();
-    }catch(e){ $('#pinErr').textContent = t('network'); }
-  };
-  $('#pad').onclick = e => { const k = e.target.closest('button')?.dataset.k; if(!k) return;
-    if(k==='back') pin=pin.slice(0,-1); else if(k==='go') return submit(); else if(pin.length<6) pin+=k;
-    $('#pinErr').textContent=''; dots(); };
-  $('#back').onclick = familyView;
+  pinPad({ title:t('grownups'), sub:t('enterPin'), back:familyView, onSubmit: async pin => {
+    const r = await rpc('np_parent_view', {p_code:state.code, p_pin:pin});
+    if(r.error) return r.error;
+    state.pin = pin; state.parent = r; parentView();
+  }});
 }
 
 async function refreshParent(){
@@ -668,11 +814,12 @@ async function refreshParent(){
   state.parent = r; parentView(true);
 }
 
-function parentView(keepScroll){
+async function parentView(keepScroll){
   rerender = () => parentView(true);
   const p = state.parent; const y = scrollY;
+  let adults = [];
+  try{ const a = await rpc('np_parent_adults', {p_code:state.code, p_pin:state.pin}); if(Array.isArray(a)) adults = a; }catch(e){}
   const total = p.kids.reduce((a,k)=>a+k.wishes.length,0), bought = p.kids.reduce((a,k)=>a+k.wishes.filter(w=>w.bought).length,0);
-  const fmt = d => new Date(d).toLocaleDateString(t('dateLocale'),{month:'short',day:'numeric'});
   view.innerHTML = `
   <div class="card">${HOLLY}
     <h2>${t('ledger')}</h2>
@@ -684,7 +831,7 @@ function parentView(keepScroll){
         ${k.wishes.length ? k.wishes.map(w=>`
           <div class="pw ${w.bought?'bought':''}">
             <input type="checkbox" data-w="${w.id}" ${w.bought?'checked':''} aria-label="✓">
-            <span class="it">${esc(w.item)}<span class="dt">${t('asked',{d:fmt(w.created_at)})}</span></span>
+            <span class="it">${esc(w.item)}<span class="dt">${t('asked',{d:fmtDay(w.created_at)})}</span></span>
             <button class="del" data-del="${w.id}" data-name="${esc(w.item)}" aria-label="X">✕</button>
           </div>`).join('') : `<p style="color:#8a7a5a">${t('noWishes')}</p>`}
         <p style="text-align:right;margin:6px 0 0"><button class="link" data-rmkid="${k.id}" data-name="${esc(k.name)}" style="color:#b33;font-size:.9rem">${t('removeKid',{name:esc(k.name)})}</button></p>
@@ -692,6 +839,10 @@ function parentView(keepScroll){
     <div class="kidsec">
       <form id="addKid" class="row"><input type="text" id="newKid" maxlength="30" placeholder="${esc(t('addChildPh'))}"><button class="btn green" type="submit">${t('add')}</button></form>
     </div>
+    ${adults.length ? `<div class="kidsec"><h3>${t('manageAdults')}</h3>
+      ${adults.map(a=>`<div class="pw"><span class="it">${esc(a.name)}</span>
+        <button class="link" data-rpin="${a.id}" data-name="${esc(a.name)}" style="font-size:.9rem">${t('resetPin')}</button>
+        <button class="link" data-rmad="${a.id}" data-name="${esc(a.name)}" style="color:#b33;font-size:.9rem">${t('orgRemove')}</button></div>`).join('')}</div>` : ''}
     <div class="stack" style="margin-top:18px">
       <button class="btn gold block" id="shareLink">${t('shareLink')} (${esc(state.code)})</button>
       <button class="btn block" id="lock">${t('lockReturn')}</button>
@@ -707,6 +858,10 @@ function parentView(keepScroll){
     await rpc('np_parent_delete_wish', {p_code:state.code, p_pin:state.pin, p_wish_id:b.dataset.del}); await refreshParent(); }));
   view.querySelectorAll('[data-rmkid]').forEach(b => b.onclick = () => confirmBox(t('confirmRemoveKid',{name:b.dataset.name}), async () => {
     await rpc('np_parent_remove_kid', {p_code:state.code, p_pin:state.pin, p_kid_id:b.dataset.rmkid}); await refreshParent(); state.family = await rpc('np_get_family',{p_code:state.code}); }));
+  view.querySelectorAll('[data-rmad]').forEach(b => b.onclick = () => confirmBox(t('ssRemoveConfirm',{name:b.dataset.name}), async () => {
+    await rpc('np_parent_remove_adult', {p_code:state.code, p_pin:state.pin, p_adult:b.dataset.rmad}); await refreshParent(); }));
+  view.querySelectorAll('[data-rpin]').forEach(b => b.onclick = () => pinPrompt(t('resetPinFor',{name:b.dataset.name}), async v => {
+    const r = await rpc('np_parent_reset_adult_pin', {p_code:state.code, p_pin:state.pin, p_adult:b.dataset.rpin, p_new_pin:v}); toast(r.error ? t('somethingWrong') : t('pinChanged')); }));
   $('#addKid').onsubmit = async e => { e.preventDefault(); const n=$('#newKid').value.trim(); if(!n) return;
     const r = await rpc('np_parent_add_kid', {p_code:state.code, p_pin:state.pin, p_name:n});
     if(r.error) return toast(r.error==='too_many'?t('max10'):t('checkName'));
@@ -715,13 +870,435 @@ function parentView(keepScroll){
   $('#lock').onclick = async ()=>{ state.pin=null; state.parent=null; state.family = await rpc('np_get_family',{p_code:state.code}); familyView(); };
 }
 
-function confirmBox(msg, onYes){
-  const m = document.createElement('div'); m.className='modal';
-  m.innerHTML = `<div class="card center"><p style="font-size:1.2rem;font-weight:600">${esc(msg)}</p>
-    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="no">${t('cancel')}</button><button class="btn" id="yes">${t('yes')}</button></div></div>`;
-  document.body.appendChild(m);
-  m.querySelector('#no').onclick = ()=>m.remove();
-  m.querySelector('#yes').onclick = async ()=>{ m.remove(); try{ await onYes(); }catch(e){ toast(t('somethingWrong')); } };
+/* ----- grown-up lists ----- */
+async function adultsView(){
+  rerender = adultsView;
+  state.adult = null; state.adultPin = null;
+  let adults = [];
+  try{ adults = await rpc('np_adults', {p_code:state.code}); }catch(e){}
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>${t('grownupLists')}</h2>
+    <p>${t('adultsSub')}</p>
+    ${adults.length ? `<div class="kids">${adults.map((a,i)=>`<button class="kid" data-i="${i}">${ornament(a.name,i+2)}<b>${esc(a.name)}</b></button>`).join('')}</div>`
+                    : `<p style="color:#8a7a5a">${t('noAdults')}</p>`}
+    <div class="stack" style="margin-top:18px">
+      <button class="btn green" id="addAdult">${t('addAdult')}</button>
+      <button class="link" id="back">${t('back')}</button>
+    </div>
+  </div>`);
+  view.querySelectorAll('.kid').forEach(b => b.onclick = () => { unlockAudio(); adultPinView(adults[+b.dataset.i]); });
+  $('#addAdult').onclick = addAdultView;
+  $('#back').onclick = familyView;
+}
+
+function addAdultView(){
+  rerender = addAdultView;
+  setView(`
+  <div class="card">${HOLLY}
+    <h2>${t('addAdultTitle')}</h2>
+    <form id="adForm">
+      <label>${t('adultName')}</label><input type="text" id="adName" maxlength="30">
+      <label>${t('adultPin')}</label><input type="tel" inputmode="numeric" id="adPin1" maxlength="6" placeholder="${esc(t('adultPinPh'))}" autocomplete="off">
+      <label>${t('pinAgain')}</label><input type="tel" inputmode="numeric" id="adPin2" maxlength="6" autocomplete="off">
+      <label>${t('familyPinNeeded')}</label><input type="password" inputmode="numeric" id="famPin" maxlength="6" autocomplete="off">
+      <div class="err" id="adErr"></div>
+      <button class="btn green block" type="submit" id="adBtn">${t('add')}</button>
+      <p class="center"><button type="button" class="link" id="back">${t('back')}</button></p>
+    </form>
+  </div>`);
+  $('#back').onclick = adultsView;
+  $('#adForm').onsubmit = async e => { e.preventDefault();
+    const err=$('#adErr'); err.textContent='';
+    const n=$('#adName').value.trim(), p1=$('#adPin1').value.trim(), p2=$('#adPin2').value.trim(), fp=$('#famPin').value.trim();
+    if(!n) return err.textContent=t('errName');
+    if(!/^\d{4,6}$/.test(p1)) return err.textContent=t('errPin');
+    if(p1!==p2) return err.textContent=t('errPinMatch');
+    $('#adBtn').disabled=true;
+    try{
+      const r = await rpc('np_add_adult', {p_code:state.code, p_family_pin:fp, p_name:n, p_pin:p1});
+      if(r.error){ err.textContent = r.error==='bad_pin' ? t('wrongPin') : r.error==='locked' ? t('locked') : r.error==='too_many' ? t('max10') : t('errForm'); $('#adBtn').disabled=false; return; }
+      state.adult = {id:r.id, name:n}; state.adultPin = p1; toast(t('added',{name:n})); adultView();
+    }catch(ex){ err.textContent=t('network'); $('#adBtn').disabled=false; }
+  };
+}
+
+function adultPinView(adult){
+  rerender = () => adultPinView(adult);
+  pinPad({ title:esc(adult.name), sub:t('enterYourPin',{name:esc(adult.name)}), back:adultsView, onSubmit: async pin => {
+    const r = await rpc('np_adult_view', {p_code:state.code, p_adult:adult.id, p_pin:pin});
+    if(r.error) return r.error;
+    state.adult = adult; state.adultPin = pin; state.adultData = r; state.adultPending = []; adultView(true);
+  }});
+}
+
+async function adultView(haveData){
+  const a = state.adult; if(!a) return adultsView();
+  rerender = () => adultView();
+  const draft = ($('#wishIn')||{}).value || '';
+  if(!haveData){
+    try{ const r = await rpc('np_adult_view', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin}); if(r.error){ toast(t('unlockAgain')); return adultPinView(a); } state.adultData = r; }
+    catch(e){ return toast(t('network')); }
+  }
+  const d = state.adultData; state.adultPending = state.adultPending || [];
+  const line = Math.floor(Math.random()*5); const voice = adultVoice(a, line);
+  const y = scrollY;
+  view.innerHTML = `
+  <div class="paper">
+    <p class="greet">${t('myList')}</p>
+    <p style="font-size:.95rem;margin:0 0 6px">${t('myListSub')}</p>
+    <p style="font-family:Caveat,cursive;font-size:1.7rem;margin:0">${t('dearSantaAdult')}</p>
+    <ul class="wish-list" id="wl">
+      ${d.my_wishes.map(w=>`<li><span class="star">★</span>${esc(w.item)}<button class="x" data-mydel="${w.id}" aria-label="X">✕</button></li>`).join('')}
+    </ul>
+    <form id="wishForm" class="row">
+      <input type="text" id="wishIn" maxlength="120" placeholder="${esc(t('wishPh'))}" autocomplete="off" value="${esc(draft)}">
+      <button class="btn green" type="submit">${t('add')}</button>
+    </form>
+    <p class="sign">${t('love',{name:esc(a.name)})}</p>
+    <div class="err" id="sendErr"></div>
+    <button class="btn cane block" id="sendBtn" disabled><span>${t('sendAdult')}</span></button>
+  </div>
+  <div class="card">
+    <h2 style="font-size:1.6rem">${t('partnerLabel')}</h2>
+    <select id="partnerSel" style="width:100%;font:inherit;font-size:1.1rem;padding:12px;border-radius:14px;border:3px solid #e2c98f;background:#fff">
+      <option value="">${t('noPartner')}</option>
+      ${d.others.map(o=>`<option value="${o.id}" ${o.id===d.partner_id?'selected':''}>${esc(o.name)}</option>`).join('')}
+    </select>
+    ${d.partner_id && !d.partner_confirmed ? `<p class="tip" style="margin-top:12px">${t('partnerWaiting',{name:esc(d.partner_name||'')})}</p>` : ''}
+    ${d.partner_confirmed ? `
+      <div class="kidsec">
+        <h3>${t('partnerList',{name:esc(d.partner_name)})}</h3>
+        <p style="font-size:.9rem;color:#7a6a4a;margin:4px 0">${t('partnerListSub',{name:esc(d.partner_name)})}</p>
+        ${d.partner_wishes.length ? d.partner_wishes.map(w=>`
+          <div class="pw ${w.bought?'bought':''}"><input type="checkbox" data-w="${w.id}" ${w.bought?'checked':''} aria-label="✓">
+          <span class="it">${esc(w.item)}<span class="dt">${t('asked',{d:fmtDay(w.created_at)})}</span></span></div>`).join('')
+          : `<p style="color:#8a7a5a">${t('noAdultWishes')}</p>`}
+      </div>` : ''}
+    <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
+  </div>`;
+  if(haveData) scrollTo({top:0,behavior:'smooth'}); else scrollTo(0,y);
+  const sendBtn = $('#sendBtn');
+  const renderPending = pendingList($('#wl'), sendBtn, state.adultPending);
+  $('#wishForm').onsubmit = e => { e.preventDefault(); const v=$('#wishIn').value.trim();
+    if(!v || state.adultPending.length>=20) return; state.adultPending.push(v); $('#wishIn').value=''; renderPending(); $('#wishIn').focus(); };
+  view.querySelectorAll('[data-mydel]').forEach(b => b.onclick = async () => {
+    await rpc('np_adult_delete_wish', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_wish:b.dataset.mydel}); adultView(); });
+  sendBtn.onclick = async () => {
+    const extra = $('#wishIn').value.trim(); if(extra){ state.adultPending.push(extra); $('#wishIn').value=''; }
+    if(!state.adultPending.length) return;
+    unlockAudio(); jingle(); sendBtn.disabled = true;
+    fetchVoice(voice).catch(()=>{});
+    try{
+      const r = await rpc('np_adult_add_wishes', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_items:state.adultPending});
+      if(r.error) throw new Error(t('unlockAgain'));
+      state.adultPending.length = 0;
+      santaScene({ bubble: adultLine(line, a.name, true), voice, back: ()=>adultView() });
+    }catch(e){ $('#sendErr').textContent = e.message; sendBtn.disabled=false; }
+  };
+  $('#partnerSel').onchange = async e => {
+    const r = await rpc('np_adult_set_partner', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_partner:e.target.value || null});
+    toast(r.error ? t('somethingWrong') : t('saved')); adultView();
+  };
+  view.querySelectorAll('input[type=checkbox][data-w]').forEach(cb => cb.onchange = async () => {
+    cb.closest('.pw').classList.toggle('bought', cb.checked);
+    try{ const r = await rpc('np_adult_set_bought', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_wish:cb.dataset.w, p_bought:cb.checked}); if(r.error) throw 0; }
+    catch(e){ toast(t('couldNotSave')); cb.checked=!cb.checked; cb.closest('.pw').classList.toggle('bought', cb.checked); }
+  });
+  $('#lock').onclick = () => { state.adult=null; state.adultPin=null; state.adultData=null; state.adultPending=[]; adultsView(); };
+}
+
+/* ----- Secret Santa ----- */
+function ssStartView(){
+  rerender = ssStartView;
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>${t('secretSanta')}</h2>
+    <p>${t('ssEnterCode')}</p>
+    <form id="ssCodeForm" class="stack">
+      <input id="ssCodeIn" class="code-input" type="text" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="ABC123">
+      <button class="btn green block" type="submit">${t('openDoor')}</button>
+      <div class="err" id="ssCodeErr"></div>
+    </form>
+    <p style="margin-top:18px">${t('ssCardText')}</p>
+    <button class="btn gold" id="toCreate">${t('ssStart')}</button>
+    <p><button class="link" id="back">${t('back')}</button></p>
+  </div>`);
+  $('#ssCodeForm').onsubmit = async e => { e.preventDefault(); const c=$('#ssCodeIn').value.trim().toUpperCase();
+    if(c.length!==6) return $('#ssCodeErr').textContent=t('codeLen'); await openCode(c, $('#ssCodeErr')); };
+  $('#toCreate').onclick = ssCreateView;
+  $('#back').onclick = () => state.family ? familyView() : homeView();
+}
+
+function ssCreateView(){
+  rerender = ssCreateView;
+  setView(`
+  <div class="card">${HOLLY}
+    <h2>${t('ssCreateTitle')}</h2>
+    <form id="ssForm">
+      <label>${t('ssGroupName')}</label><input type="text" id="gName" maxlength="40" placeholder="${esc(t('ssGroupPh'))}">
+      <label>${t('ssOrgName')}</label><input type="text" id="oName" maxlength="40">
+      <label>${t('ssBudget')}</label><input type="text" id="gBudget" maxlength="30" placeholder="${esc(t('ssBudgetPh'))}">
+      <label>${t('ssDate')}</label><input type="date" id="gDate" style="width:100%;font:inherit;font-size:1.1rem;padding:12px;border-radius:14px;border:3px solid #e2c98f;background:#fff;color:var(--ink)">
+      <label>${t('ssOrgPin')}</label><input type="tel" inputmode="numeric" id="oPin1" maxlength="6" autocomplete="off">
+      <label>${t('pinAgain')}</label><input type="tel" inputmode="numeric" id="oPin2" maxlength="6" autocomplete="off">
+      <div class="err" id="ssErr"></div>
+      <button class="btn green block" type="submit" id="ssBtn">${t('ssCreateBtn')}</button>
+      <p class="center"><button type="button" class="link" id="back">${t('back')}</button></p>
+    </form>
+  </div>`);
+  $('#back').onclick = () => state.family ? familyView() : homeView();
+  $('#ssForm').onsubmit = async e => { e.preventDefault();
+    const err=$('#ssErr'); err.textContent='';
+    const g=$('#gName').value.trim(), o=$('#oName').value.trim(), b=$('#gBudget').value.trim(), d=$('#gDate').value || null, p1=$('#oPin1').value.trim(), p2=$('#oPin2').value.trim();
+    if(!g) return err.textContent=t('errFamily');
+    if(!o) return err.textContent=t('errName');
+    if(!/^\d{4,6}$/.test(p1)) return err.textContent=t('errPin');
+    if(p1!==p2) return err.textContent=t('errPinMatch');
+    $('#ssBtn').disabled=true;
+    try{
+      const r = await rpc('ss_create_group', {p_name:g, p_org_name:o, p_pin:p1, p_budget:b, p_date:d});
+      if(r.error){ err.textContent = r.error==='full' ? t('errFull') : t('errForm'); $('#ssBtn').disabled=false; return; }
+      state.ssCode = r.code; store.set('np_ss', r.code); state.orgPin = p1;
+      ssCreatedView(r.code);
+    }catch(ex){ err.textContent=t('network'); $('#ssBtn').disabled=false; }
+  };
+}
+
+function ssCreatedView(code){
+  rerender = () => ssCreatedView(code);
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>${t('ssCreated')}</h2>
+    <p>${t('ssGroupCode')}</p>
+    <div class="codebox">${esc(code)}</div>
+    <p>${t('ssShareHelp')}</p>
+    <div class="stack">
+      <button class="btn gold block" id="share">${t('ssShareLink')}</button>
+      <button class="btn green block" id="join">${t('ssJoinMyself')}</button>
+      <button class="btn block" id="org">${t('ssOrgTools')}</button>
+    </div>
+  </div>`);
+  $('#share').onclick = () => shareFamily(code, 'ssShareText');
+  $('#join').onclick = async () => { await openCode(code); ssJoinView(); };
+  $('#org').onclick = async () => { const g = await rpc('ss_get_group',{p_code:code}); state.group = g; orgView(); };
+}
+
+function groupHeader(g){
+  return `<h2>${esc(g.name)}</h2>
+    <p class="center" style="font-weight:600">${g.budget ? t('ssBudgetLabel',{b:esc(g.budget)}) : ''}${g.budget && g.exchange_date ? ' · ' : ''}${g.exchange_date ? t('ssDateLabel',{d:fmtDay(g.exchange_date)}) : ''}</p>`;
+}
+
+async function groupView(){
+  rerender = groupView;
+  state.ssMember = null; state.ssPin = null; state.orgPin = null;
+  try{ const g = await rpc('ss_get_group', {p_code:state.ssCode}); if(g) state.group = g; }catch(e){}
+  const g = state.group;
+  const open = !g.signups_locked && !g.drawn;
+  setView(`
+  <div class="card center">${HOLLY}
+    ${groupHeader(g)}
+    <p style="color:#7a6a4a">${t('ssPlayers',{n:g.members.length})}</p>
+    ${g.members.length ? `<p>${t('ssWhoAreYou')}</p>
+      <div class="kids">${g.members.map((m,i)=>`<button class="kid" data-i="${i}">${ornament(m.name,i)}<b>${esc(m.name)}</b></button>`).join('')}</div>` : ''}
+    <div class="stack" style="margin-top:18px">
+      ${open ? `<button class="btn green" id="join">${t('ssNew')}</button>` : `<p class="tip">${t('ssClosed')}</p>`}
+      <button class="btn gold" id="share">${t('ssShareLink')}</button>
+      <button class="btn ghost" id="org">${t('ssOrgTools')}</button>
+    </div>
+    <p>${state.family ? `<button class="link" id="fam">${esc(state.family.family_name)}</button> · ` : ''}<button class="link" id="leave">${t('ssLeave')}</button></p>
+  </div>`);
+  view.querySelectorAll('.kid').forEach(b => b.onclick = () => { unlockAudio(); memberPinView(g.members[+b.dataset.i]); });
+  if(open) $('#join').onclick = ssJoinView;
+  $('#share').onclick = () => shareFamily(state.ssCode, 'ssShareText');
+  $('#org').onclick = orgPinView;
+  if(state.family) $('#fam').onclick = familyView;
+  $('#leave').onclick = () => { store.del('np_ss'); state.ssCode=null; state.group=null; state.family ? familyView() : homeView(); };
+}
+
+function ssJoinView(){
+  rerender = ssJoinView;
+  const g = state.group;
+  setView(`
+  <div class="card">${HOLLY}
+    <h2>${t('ssJoinTitle',{group:esc(g.name)})}</h2>
+    <form id="jForm">
+      <label>${t('ssYourName')}</label><input type="text" id="jName" maxlength="30">
+      <label>${t('ssYourPin')}</label><input type="tel" inputmode="numeric" id="jPin1" maxlength="6" autocomplete="off">
+      <label>${t('pinAgain')}</label><input type="tel" inputmode="numeric" id="jPin2" maxlength="6" autocomplete="off">
+      <div class="err" id="jErr"></div>
+      <button class="btn green block" type="submit" id="jBtn">${t('ssJoinBtn')}</button>
+      <p class="center"><button type="button" class="link" id="back">${t('back')}</button></p>
+    </form>
+  </div>`);
+  $('#back').onclick = groupView;
+  $('#jForm').onsubmit = async e => { e.preventDefault();
+    const err=$('#jErr'); err.textContent='';
+    const n=$('#jName').value.trim(), p1=$('#jPin1').value.trim(), p2=$('#jPin2').value.trim();
+    if(!n) return err.textContent=t('errName');
+    if(!/^\d{4,6}$/.test(p1)) return err.textContent=t('errPin');
+    if(p1!==p2) return err.textContent=t('errPinMatch');
+    $('#jBtn').disabled=true;
+    try{
+      const r = await rpc('ss_join', {p_code:state.ssCode, p_name:n, p_pin:p1});
+      if(r.error){ err.textContent = r.error==='name_taken' ? t('errNameTaken') : r.error==='closed' ? t('ssClosed') : r.error==='full' ? t('errFull') : t('errForm'); $('#jBtn').disabled=false; return; }
+      state.ssMember = {id:r.member_id, name:n}; state.ssPin = p1; memberView();
+    }catch(ex){ err.textContent=t('network'); $('#jBtn').disabled=false; }
+  };
+}
+
+function memberPinView(m){
+  rerender = () => memberPinView(m);
+  pinPad({ title:esc(m.name), sub:t('enterYourPin',{name:esc(m.name)}), back:groupView, onSubmit: async pin => {
+    const r = await rpc('ss_member_view', {p_code:state.ssCode, p_member:m.id, p_pin:pin});
+    if(r.error) return r.error;
+    state.ssMember = m; state.ssPin = pin; memberView(r);
+  }});
+}
+
+async function memberView(data){
+  const m = state.ssMember; if(!m) return groupView();
+  rerender = () => memberView();
+  if(!data){
+    try{ data = await rpc('ss_member_view', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin}); if(data.error){ toast(t('unlockAgain')); return memberPinView(m); } }
+    catch(e){ return toast(t('network')); }
+  }
+  setView(`
+  <div class="card center">${HOLLY}
+    ${groupHeader(data)}
+    <h3 style="color:var(--green-d);font-size:1.5rem;margin:6px 0">${t('ssHi',{name:esc(data.me)})}</h3>
+    ${data.drawn ? `<button class="btn cane block" id="reveal"><span>${data.revealed ? t('ssShowAgain') : t('ssRevealBtn')}</span></button>`
+                 : `<p class="tip">${t('ssNotDrawn')}</p>`}
+  </div>
+  <div class="card">
+    <h2 style="font-size:1.6rem">${t('ssMyWishes')}</h2>
+    <p style="font-size:.95rem;color:#7a6a4a;margin:0 0 6px">${t('ssWishHelp')}</p>
+    <ul class="wish-list" style="font-family:Fredoka" id="wl">
+      ${data.wishes.map(w=>`<li style="font-family:Fredoka;font-size:1.15rem"><span class="star">★</span>${esc(w.item)}<button class="x" data-del="${w.id}" aria-label="X">✕</button></li>`).join('')}
+    </ul>
+    <form id="wishForm" class="row">
+      <input type="text" id="wishIn" maxlength="120" placeholder="${esc(t('wishPh'))}" autocomplete="off">
+      <button class="btn green" type="submit">${t('add')}</button>
+    </form>
+    <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
+  </div>`);
+  if(data.drawn) $('#reveal').onclick = () => { unlockAudio(); revealScene(data); };
+  $('#wishForm').onsubmit = async e => { e.preventDefault(); const v=$('#wishIn').value.trim(); if(!v) return;
+    const r = await rpc('ss_member_add_wishes', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin, p_items:[v]});
+    if(r.error) return toast(t('unlockAgain')); memberView(); };
+  view.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    await rpc('ss_member_delete_wish', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin, p_wish:b.dataset.del}); memberView(); });
+  $('#lock').onclick = groupView;
+}
+
+const GIFT = `<svg viewBox="0 0 200 200" width="190" height="190"><g id="giftLid"><rect x="22" y="50" width="156" height="34" rx="6" fill="#e0263f"/><rect x="88" y="50" width="24" height="34" fill="#f5c542"/>
+<path d="M100 50 C70 10 40 30 70 48 Z M100 50 C130 10 160 30 130 48 Z" fill="#f5c542" stroke="#c99a1c" stroke-width="3"/></g>
+<rect x="32" y="84" width="136" height="104" rx="6" fill="#c8102e"/><rect x="88" y="84" width="24" height="104" fill="#f5c542"/></svg>`;
+async function revealScene(data){
+  rerender = () => {};
+  const ov = $('#overlay'); ov.classList.remove('hidden');
+  ov.innerHTML = `<div class="gift-wrap" id="gift">${GIFT}</div><div class="ov-text">${t('ssUnwrap')}</div>`;
+  jingle();
+  let r;
+  try{ r = await rpc('ss_reveal', {p_code:state.ssCode, p_member:state.ssMember.id, p_pin:state.ssPin}); }catch(e){ r = {error:'network'}; }
+  setTimeout(()=>{
+    if(r.error){ ov.classList.add('hidden'); ov.innerHTML=''; toast(r.error==='network'?t('network'):t('unlockAgain')); return memberView(); }
+    $('#gift').classList.add('open');
+    setTimeout(()=>{
+      ov.innerHTML = `<div class="ov-text" style="margin-top:0">${t('ssYouGot')}</div>
+        <div class="reveal-name">${esc(r.name)}</div>
+        <div class="bubble" style="text-align:left">
+          <b>${t('ssTheirList')}</b>
+          ${r.wishes.length ? `<ul style="margin:8px 0 0;padding-left:20px">${r.wishes.map(w=>`<li>${esc(w.item)}</li>`).join('')}</ul>` : `<p style="margin:8px 0 0">${t('ssNoList')}</p>`}
+          ${data.budget || data.exchange_date ? `<p style="margin:10px 0 0;color:#7a6a4a">${data.budget ? t('ssBudgetLabel',{b:esc(data.budget)}) : ''}${data.budget && data.exchange_date ? ' · ' : ''}${data.exchange_date ? t('ssDateLabel',{d:fmtDay(data.exchange_date)}) : ''}</p>` : ''}
+        </div>
+        <p class="ov-text" style="font-size:1.4rem">${t('ssShh')}</p>
+        <div class="ov-actions"><button class="btn green" id="done">${t('back')}</button></div>`;
+      burst();
+      $('#done').onclick = ()=>{ ov.classList.add('hidden'); ov.innerHTML=''; memberView(); };
+    }, 900);
+  }, 1400);
+}
+
+/* ----- organizer ----- */
+function orgPinView(){
+  rerender = orgPinView;
+  pinPad({ title:t('ssOrgTools'), sub:t('enterPin'), back:groupView, onSubmit: async pin => {
+    const r = await rpc('ss_org_view', {p_code:state.ssCode, p_pin:pin});
+    if(r.error) return r.error;
+    state.orgPin = pin; orgView(r);
+  }});
+}
+
+async function orgView(data){
+  rerender = () => orgView();
+  if(!state.orgPin) return orgPinView();
+  if(!data){
+    try{ data = await rpc('ss_org_view', {p_code:state.ssCode, p_pin:state.orgPin}); if(data.error){ toast(t('unlockAgain')); return orgPinView(); } }
+    catch(e){ return toast(t('network')); }
+  }
+  const y = scrollY;
+  const mem = data.members, revealed = mem.filter(m=>m.revealed).length;
+  const opts = `<option value="">${t('orgPick')}</option>` + mem.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  const rules = kind => data.exclusions.filter(e=>e.kind===kind).map(e=>`<div class="pw"><span class="it">${esc(e.a)} ${kind==='couple'?t('orgAnd'):'→'} ${esc(e.b)}</span><button class="del" data-rmx="${e.id}" aria-label="X">✕</button></div>`).join('');
+  const sel = id => `<select id="${id}" class="sel">${opts}</select>`;
+  view.innerHTML = `
+  <div class="card">${HOLLY}
+    <h2>${t('ssOrgTools')}</h2>
+    ${groupHeader(data)}
+    <p class="center" style="font-size:.9rem;color:#7a6a4a">${t('orgBlind')}</p>
+    <div class="stack" style="margin:10px 0">
+      ${data.drawn ? `<p class="tip">${t('orgDrawn',{r:revealed,n:mem.length})}</p>
+        ${revealed===0 ? `<button class="btn ghost block" id="draw">${t('orgRedraw')}</button>` : ''}
+        <button class="btn block" id="newRound">${t('orgNewRound')}</button>`
+      : `<button class="btn cane block" id="draw"><span>${t('orgDraw')}</span></button>`}
+      <button class="btn gold block" id="share">${t('ssShareLink')} (${esc(state.ssCode)})</button>
+    </div>
+    <div class="err" id="orgErr"></div>
+    <div class="kidsec"><h3>${t('orgPlayers')} <span class="pill">${mem.length}</span></h3>
+      ${mem.map(m=>`<div class="pw"><span class="it">${esc(m.name)}<span class="dt">${t('orgWishCount',{n:m.wish_count})}${data.drawn ? ' · ' + (m.revealed ? '✓ '+t('orgOpened') : t('orgNotOpened')) : ''}</span></span>
+        <button class="link" data-rpin="${m.id}" data-name="${esc(m.name)}" style="font-size:.9rem">${t('resetPin')}</button>
+        ${data.drawn ? '' : `<button class="del" data-rm="${m.id}" data-name="${esc(m.name)}" aria-label="X">✕</button>`}</div>`).join('')}
+    </div>
+    <div class="kidsec"><h3>${t('orgRules')}</h3>
+      <p style="font-weight:600;margin:10px 0 4px">${t('orgCouples')}</p>
+      ${rules('couple')}
+      <div class="row" style="flex-wrap:wrap">${sel('cA')}<span>${t('orgAnd')}</span>${sel('cB')}<button class="btn green" id="addCouple">${t('orgAdd')}</button></div>
+      <p style="font-weight:600;margin:14px 0 4px">${t('orgLastYear')}</p>
+      ${rules('lastyear')}
+      <div class="row" style="flex-wrap:wrap">${sel('lA')}<span>${t('orgGaveTo')}</span>${sel('lB')}<button class="btn green" id="addLast">${t('orgAdd')}</button></div>
+    </div>
+    <div class="kidsec"><h3>${t('orgSettings')}</h3>
+      <label>${t('ssBudget')}</label><input type="text" id="sBudget" maxlength="30" value="${esc(data.budget||'')}">
+      <label>${t('ssDate')}</label><input type="date" id="sDate" value="${esc(data.exchange_date||'')}" class="sel" style="width:100%">
+      <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="sLock" ${data.signups_locked?'checked':''} ${data.drawn?'disabled':''} style="width:24px;height:24px"> ${t('orgLockSignups')}</label>
+      <button class="btn green" id="saveSettings">${t('save')}</button>
+    </div>
+    <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
+  </div>`;
+  scrollTo(0, data._top ? 0 : y);
+  const org = (fn, args) => rpc(fn, Object.assign({p_code:state.ssCode, p_pin:state.orgPin}, args));
+  const errMsg = e => ({too_few:t('errTooFew'), impossible:t('errImpossible'), already_revealed:t('errAlreadyRevealed'), drawn:t('errDrawn'), locked:t('locked'), bad_pin:t('unlockAgain')}[e] || t('somethingWrong'));
+  const drawBtn = $('#draw');
+  if(drawBtn) drawBtn.onclick = () => confirmBox(t('orgDrawConfirm'), async () => {
+    const r = await org('ss_org_draw', {}); if(r.error){ $('#orgErr').textContent = errMsg(r.error); return; }
+    jingle(); burst(); toast(t('drawnToast')); orgView(); });
+  const nr = $('#newRound'); if(nr) nr.onclick = () => confirmBox(t('orgNewRoundConfirm'), async () => {
+    const r = await org('ss_org_new_round', {}); if(r.error) return toast(errMsg(r.error)); orgView(); });
+  $('#share').onclick = () => shareFamily(state.ssCode, 'ssShareText');
+  view.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => confirmBox(t('ssRemoveConfirm',{name:b.dataset.name}), async () => {
+    const r = await org('ss_org_remove_member', {p_member:b.dataset.rm}); if(r.error) toast(errMsg(r.error)); orgView(); }));
+  view.querySelectorAll('[data-rpin]').forEach(b => b.onclick = () => pinPrompt(t('resetPinFor',{name:b.dataset.name}), async v => {
+    const r = await org('ss_org_reset_pin', {p_member:b.dataset.rpin, p_new_pin:v}); toast(r.error ? errMsg(r.error) : t('pinChanged')); }));
+  view.querySelectorAll('[data-rmx]').forEach(b => b.onclick = async () => { await org('ss_org_remove_exclusion', {p_excl:b.dataset.rmx}); orgView(); });
+  const addRule = (a, b, kind) => async () => { const A=$('#'+a).value, B=$('#'+b).value; if(!A || !B || A===B) return;
+    const r = await org('ss_org_add_exclusion', {p_a:A, p_b:B, p_kind:kind}); if(r.error) toast(errMsg(r.error)); orgView(); };
+  $('#addCouple').onclick = addRule('cA','cB','couple');
+  $('#addLast').onclick = addRule('lA','lB','lastyear');
+  $('#saveSettings').onclick = async () => {
+    const r = await org('ss_org_update', {p_budget:$('#sBudget').value, p_date:$('#sDate').value || null, p_locked:$('#sLock').checked});
+    toast(r.error ? errMsg(r.error) : t('saved')); orgView(); };
+  $('#lock').onclick = () => { state.orgPin = null; groupView(); };
 }
 
 /* ---------- start ---------- */
@@ -729,21 +1306,23 @@ function readHash(){
   // link formats: #ABC123 or #ABC123-es / #ABC123-en
   const h = (location.hash||'').replace('#','').trim();
   const m = /^([A-Za-z0-9]{6})(?:-(en|es))?$/.exec(h);
-  if(!m) return false;
-  state.code = m[1].toUpperCase(); state.family = null;
+  if(!m) return null;
   if(m[2]){ LANG = m[2]; store.set('np_lang', LANG); }
   try{ history.replaceState(null,'',location.pathname); }catch(e){}
-  return true;
+  return m[1].toUpperCase();
 }
-function boot(){
+async function boot(code){
   applyStatic();
-  if(state.code) openFamily(state.code).then(()=>{ if(!state.family) homeView(); }); else homeView();
+  if(code && await openCode(code)) return;
+  if(state.code && await openCode(state.code)) return;
+  const s = store.get('np_ss'); if(s && await openCode(s)) return;
+  homeView();
 }
 (function start(){
-  readHash();
+  const code = readHash();
   document.querySelectorAll('#langSw button').forEach(b => b.onclick = () => setLang(b.dataset.l));
-  addEventListener('hashchange', () => { if(readHash()) boot(); });
-  boot();
+  addEventListener('hashchange', () => { const c = readHash(); if(c) boot(c); });
+  boot(code);
 })();
 </script>
 </body>
