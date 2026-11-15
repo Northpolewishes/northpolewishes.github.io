@@ -460,8 +460,23 @@ const SANTA = `<svg viewBox="0 0 320 340" aria-label="Santa waving">
 
 /* ---------- audio (sleigh bells + Santa voice) ---------- */
 let actx = null;
+// iPhone: a plain <audio> element plays even with the silent switch on; Web Audio does not.
+let santaEl = null, silentUrl = null;
+function silentWav(){
+  if(silentUrl) return silentUrl;
+  const n = 800, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, s) => [...s].forEach((c,i)=>v.setUint8(o+i, c.charCodeAt(0)));
+  w(0,'RIFF'); v.setUint32(4, 36+n, true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,8000,true); v.setUint32(28,8000,true); v.setUint16(32,1,true); v.setUint16(34,8,true); w(36,'data'); v.setUint32(40,n,true);
+  for(let i=0;i<n;i++) v.setUint8(44+i,128);
+  return silentUrl = URL.createObjectURL(new Blob([b],{type:'audio/wav'}));
+}
 function unlockAudio(){
+  try{ if(navigator.audioSession) navigator.audioSession.type = 'playback'; }catch(e){}
   try{ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){}
+  try{
+    if(!santaEl){ santaEl = new Audio(); santaEl.setAttribute('playsinline',''); santaEl.preload = 'auto'; }
+    if(santaEl.paused){ santaEl.src = silentWav(); const p = santaEl.play(); if(p) p.catch(()=>{}); }
+  }catch(e){}
 }
 function jingle(){
   if(!actx) return; const t0 = actx.currentTime;
@@ -500,21 +515,23 @@ const ADULT_LINES = {
 };
 const adultLine = (line, name, html) => ADULT_LINES[LANG][line].split('{name}').join(html ? `<b>${esc(name)}</b>` : name);
 const adultVoice = (adult, line) => ({ key:'a:'+adult.id+':'+LANG+':'+line, body:{adult_id:adult.id, line}, fallback:adultLine(line, adult.name) });
+const voiceUrls = {};
 let lastBuffer = null, lastKey = null;
 async function playSanta(req){
   const wrap = $('.santa-wrap'); const mouth = document.getElementById('santaMouth');
-  const talk = on => { if(wrap) wrap.classList.toggle('talking', on); };
-  if(lastKey !== req.key){ lastBuffer = null; lastKey = req.key; }
+  const talk = on => { if(wrap) wrap.classList.toggle('talking', on); if(!on && mouth) mouth.style.transform='scaleY(1)'; };
   try{
-    if(!lastBuffer){ const ab = await fetchVoice(req); lastBuffer = await actx.decodeAudioData(ab.slice(0)); }
-    const src = actx.createBufferSource(); src.buffer = lastBuffer;
-    const an = actx.createAnalyser(); an.fftSize = 256; src.connect(an); an.connect(actx.destination);
-    const data = new Uint8Array(an.frequencyBinCount); let playing = true;
-    src.onended = ()=>{ playing=false; talk(false); if(mouth) mouth.style.transform='scaleY(1)'; };
-    src.start(); talk(true);
-    (function loop(){ if(!playing) return; an.getByteFrequencyData(data);
-      let s=0; for(let i=2;i<40;i++) s+=data[i]; const lvl=Math.min(1,s/(38*140));
-      if(mouth) mouth.style.transform=`scaleY(${0.6+lvl*2.6})`; requestAnimationFrame(loop); })();
+    if(!voiceUrls[req.key]){ const ab = await fetchVoice(req); voiceUrls[req.key] = URL.createObjectURL(new Blob([ab],{type:'audio/mpeg'})); }
+    if(!santaEl){ santaEl = new Audio(); santaEl.setAttribute('playsinline',''); }
+    santaEl.pause(); santaEl.src = voiceUrls[req.key]; santaEl.currentTime = 0;
+    santaEl.onended = () => talk(false);
+    await santaEl.play();
+    talk(true);
+    const t0 = performance.now();
+    (function loop(){ if(!santaEl || santaEl.paused || santaEl.ended){ talk(false); return; }
+      const t = (performance.now()-t0)/1000;
+      if(mouth) mouth.style.transform = `scaleY(${0.7 + Math.abs(Math.sin(t*11)) * (1.2 + Math.sin(t*3.1))})`;
+      requestAnimationFrame(loop); })();
   }catch(e){
     // fallback: device voice
     try{
