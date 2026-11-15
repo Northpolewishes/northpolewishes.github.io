@@ -56,7 +56,7 @@ h1.title{
 .cd-label{text-align:center;font-family:'Mountains of Christmas',cursive;font-size:1.6rem;color:#fff;margin-top:6px}
 /* forms */
 label{display:block;font-weight:600;margin:12px 0 6px}
-input[type=text],input[type=tel],input[type=password]{
+input[type=text],input[type=tel],input[type=password],input[type=url]{
   width:100%;font:inherit;font-size:1.15rem;padding:13px 14px;border-radius:14px;border:3px solid #e2c98f;
   background:#fff;color:var(--ink);outline:none;
 }
@@ -168,6 +168,9 @@ input:focus{border-color:var(--green)}
   text-shadow:0 0 24px rgba(245,197,66,.9),0 4px 0 var(--red-d);animation:pop .7s cubic-bezier(.2,1.5,.4,1) both;line-height:1.1;margin:6px 0}
 .sel{font:inherit;font-size:1rem;padding:10px;border-radius:12px;border:3px solid #e2c98f;background:#fff;color:var(--ink);flex:1;min-width:110px}
 .overlay .bubble ul{font-weight:500}
+a.shop{display:inline-block;font-family:Fredoka,sans-serif;font-size:.85rem;font-weight:600;color:#fff;background:var(--green);border-radius:999px;padding:3px 10px;margin-left:6px;text-decoration:none;vertical-align:middle;line-height:1.4}
+.overlay a.shop{font-size:.8rem}
+.wish-list li > span:not(.star){flex:1}
 @media (prefers-reduced-motion:reduce){.bulb,#santaArm,.santa-body,#santaEyes{animation:none}}
 </style>
 </head>
@@ -324,7 +327,8 @@ Object.assign(I18N.en, {
   errTooFew:'You need at least 3 players.', errImpossible:'No draw fits these rules. Remove a rule or add players.',
   errAlreadyRevealed:"Someone already opened their person, so you can't redraw.", errDrawn:'Names are already drawn.',
   ssShareText:'Join our Secret Santa! Tap the link, add your name, and pick a PIN. Group code: {code}.', ssRemoveConfirm:'Remove {name}?',
-  drawnToast:'Names drawn! Tell everyone to open their person.'
+  drawnToast:'Names drawn! Tell everyone to open their person.',
+  linkPh:'Store link (optional)', viewLink:'Link', shopIt:'Shop it'
 });
 Object.assign(I18N.es, {
   grownupLists:'Listas de Adultos', secretSanta:'Amigo Secreto', lock:'Bloquear', save:'Guardar', saved:'¡Guardado!', pinChanged:'¡PIN cambiado!',
@@ -357,7 +361,8 @@ Object.assign(I18N.es, {
   errTooFew:'Necesitas al menos 3 jugadores.', errImpossible:'Ningún sorteo cumple estas reglas. Quita una regla o agrega jugadores.',
   errAlreadyRevealed:'Alguien ya vio a quién le tocó, así que no se puede volver a sortear.', errDrawn:'Los nombres ya se sortearon.',
   ssShareText:'¡Únete a nuestro Amigo Secreto! Toca el enlace, escribe tu nombre y elige un PIN. Código: {code}.', ssRemoveConfirm:'¿Quitar a {name}?',
-  drawnToast:'¡Nombres sorteados! Diles a todos que vean a quién les tocó.'
+  drawnToast:'¡Nombres sorteados! Diles a todos que vean a quién les tocó.',
+  linkPh:'Enlace (opcional)', viewLink:'Enlace', shopIt:'Ver en tienda'
 });
 let LANG = (store.get('np_lang') || ((navigator.language||'').toLowerCase().startsWith('es') ? 'es' : 'en'));
 function t(k, vars){ let s = (I18N[LANG]||I18N.en)[k] ?? I18N.en[k] ?? k; if(vars) for(const v in vars) s = s.split('{'+v+'}').join(vars[v]); return s; }
@@ -607,12 +612,15 @@ function pinPrompt(msg, onPin){
     m.remove(); try{ await onPin(v); }catch(e){ toast(t('somethingWrong')); } };
 }
 
+let sceneId = 0; // bumps when the screen changes so old animation timers stop
 function santaScene({bubble, voice, back}){
   rerender = () => {};
+  const my = ++sceneId;
   const ov = $('#overlay'); ov.classList.remove('hidden');
   ov.innerHTML = `<div class="envelope seal" id="env">${envelopeSvg()}</div><div class="ov-text">${t('sealing')}</div>`;
-  setTimeout(()=>{ $('.ov-text').textContent=t('whoosh'); jingle(); $('#env').classList.add('fly'); }, 1300);
+  setTimeout(()=>{ if(my !== sceneId) return; $('.ov-text').textContent=t('whoosh'); jingle(); $('#env').classList.add('fly'); }, 1300);
   setTimeout(()=>{
+    if(my !== sceneId) return;
     ov.innerHTML = `<div class="santa-wrap">${SANTA}</div>
       <div class="bubble">${bubble}</div>
       <div class="ov-actions"><button class="btn gold" id="again">${t('hearAgain')}</button><button class="btn green" id="done">${t('backLetter')}</button></div>`;
@@ -627,11 +635,32 @@ function pendingList(listEl, sendBtn, items){
   const render = () => {
     listEl.querySelectorAll('li.pending').forEach(li=>li.remove());
     items.forEach((p,i)=>{ const li=document.createElement('li'); li.className='pending';
-      li.innerHTML=`<span class="star">✦</span>${esc(p)}<button class="x" aria-label="X">✕</button>`;
+      li.innerHTML=`<span class="star">✦</span>${esc(p.item || p)}${p.link ? ' 🔗' : ''}<button class="x" aria-label="X">✕</button>`;
       li.querySelector('.x').onclick=()=>{ items.splice(i,1); render(); }; listEl.appendChild(li); });
     if(sendBtn) sendBtn.disabled = items.length===0;
   };
   render(); return render;
+}
+// links: http(s) only; bare domains get https://
+function cleanLink(v){
+  v = String(v||'').trim(); if(!v) return '';
+  if(!/^https?:\/\//i.test(v)){ if(/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$)/i.test(v)) v = 'https://' + v; else return ''; }
+  return (v.length > 600 || /[\s<>"]/.test(v)) ? '' : v;
+}
+const linkBtn = (link, label) => link ? ` <a class="shop" href="${esc(link)}" target="_blank" rel="noopener noreferrer">🔗 ${label || t('viewLink')}</a>` : '';
+const wishFormHtml = (draft) => `
+    <form id="wishForm" class="stack" style="gap:8px" novalidate>
+      <input type="text" id="wishIn" maxlength="120" placeholder="${esc(t('wishPh'))}" autocomplete="off" value="${esc(draft||'')}">
+      <div class="row"><input type="text" id="linkIn" autocapitalize="off" spellcheck="false" maxlength="600" placeholder="${esc(t('linkPh'))}" autocomplete="off" inputmode="url"><button class="btn green" type="submit">${t('add')}</button></div>
+    </form>`;
+// read the form; a link pasted into the wish box moves to the link box
+function readWish(){
+  let item = $('#wishIn').value.trim(), link = ($('#linkIn')||{}).value || '';
+  if(!link && /^(https?:\/\/|www\.)\S+$/i.test(item)){ link = item; try{ item = new URL(cleanLink(item)).hostname.replace(/^www\./,''); }catch(e){} }
+  link = cleanLink(link);
+  if(!item) return null;
+  $('#wishIn').value=''; if($('#linkIn')) $('#linkIn').value='';
+  return {item, link};
 }
 
 /* ----- home / routing ----- */
@@ -966,12 +995,8 @@ async function adultView(haveData){
     <p style="font-size:.95rem;margin:0 0 6px">${t('myListSub')}</p>
     <p style="font-family:Caveat,cursive;font-size:1.7rem;margin:0">${t('dearSantaAdult')}</p>
     <ul class="wish-list" id="wl">
-      ${d.my_wishes.map(w=>`<li><span class="star">★</span>${esc(w.item)}<button class="x" data-mydel="${w.id}" aria-label="X">✕</button></li>`).join('')}
-    </ul>
-    <form id="wishForm" class="row">
-      <input type="text" id="wishIn" maxlength="120" placeholder="${esc(t('wishPh'))}" autocomplete="off" value="${esc(draft)}">
-      <button class="btn green" type="submit">${t('add')}</button>
-    </form>
+      ${d.my_wishes.map(w=>`<li><span class="star">★</span><span>${esc(w.item)}${linkBtn(w.link)}</span><button class="x" data-mydel="${w.id}" aria-label="X">✕</button></li>`).join('')}
+    </ul>${wishFormHtml(draft)}
     <p class="sign">${t('love',{name:esc(a.name)})}</p>
     <div class="err" id="sendErr"></div>
     <button class="btn cane block" id="sendBtn" disabled><span>${t('sendAdult')}</span></button>
@@ -989,7 +1014,7 @@ async function adultView(haveData){
         <p style="font-size:.9rem;color:#7a6a4a;margin:4px 0">${t('partnerListSub',{name:esc(d.partner_name)})}</p>
         ${d.partner_wishes.length ? d.partner_wishes.map(w=>`
           <div class="pw ${w.bought?'bought':''}"><input type="checkbox" data-w="${w.id}" ${w.bought?'checked':''} aria-label="✓">
-          <span class="it">${esc(w.item)}<span class="dt">${t('asked',{d:fmtDay(w.created_at)})}</span></span></div>`).join('')
+          <span class="it">${esc(w.item)}${linkBtn(w.link, t('shopIt'))}<span class="dt">${t('asked',{d:fmtDay(w.created_at)})}</span></span></div>`).join('')
           : `<p style="color:#8a7a5a">${t('noAdultWishes')}</p>`}
       </div>` : ''}
     <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
@@ -997,17 +1022,17 @@ async function adultView(haveData){
   if(haveData) scrollTo({top:0,behavior:'smooth'}); else scrollTo(0,y);
   const sendBtn = $('#sendBtn');
   const renderPending = pendingList($('#wl'), sendBtn, state.adultPending);
-  $('#wishForm').onsubmit = e => { e.preventDefault(); const v=$('#wishIn').value.trim();
-    if(!v || state.adultPending.length>=20) return; state.adultPending.push(v); $('#wishIn').value=''; renderPending(); $('#wishIn').focus(); };
+  $('#wishForm').onsubmit = e => { e.preventDefault(); if(state.adultPending.length>=20) return; const w = readWish();
+    if(!w) return; state.adultPending.push(w); renderPending(); $('#wishIn').focus(); };
   view.querySelectorAll('[data-mydel]').forEach(b => b.onclick = async () => {
     await rpc('np_adult_delete_wish', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_wish:b.dataset.mydel}); adultView(); });
   sendBtn.onclick = async () => {
-    const extra = $('#wishIn').value.trim(); if(extra){ state.adultPending.push(extra); $('#wishIn').value=''; }
+    const extra = readWish(); if(extra) state.adultPending.push(extra);
     if(!state.adultPending.length) return;
     unlockAudio(); jingle(); sendBtn.disabled = true;
     fetchVoice(voice).catch(()=>{});
     try{
-      const r = await rpc('np_adult_add_wishes', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_items:state.adultPending});
+      const r = await rpc('np_adult_add_items', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_items:state.adultPending.map(p => typeof p === 'string' ? {item:p, link:''} : p)});
       if(r.error) throw new Error(t('unlockAgain'));
       state.adultPending.length = 0;
       santaScene({ bubble: adultLine(line, a.name, true), voice, back: ()=>adultView() });
@@ -1191,17 +1216,13 @@ async function memberView(data){
     <h2 style="font-size:1.6rem">${t('ssMyWishes')}</h2>
     <p style="font-size:.95rem;color:#7a6a4a;margin:0 0 6px">${t('ssWishHelp')}</p>
     <ul class="wish-list" style="font-family:Fredoka" id="wl">
-      ${data.wishes.map(w=>`<li style="font-family:Fredoka;font-size:1.15rem"><span class="star">★</span>${esc(w.item)}<button class="x" data-del="${w.id}" aria-label="X">✕</button></li>`).join('')}
-    </ul>
-    <form id="wishForm" class="row">
-      <input type="text" id="wishIn" maxlength="120" placeholder="${esc(t('wishPh'))}" autocomplete="off">
-      <button class="btn green" type="submit">${t('add')}</button>
-    </form>
+      ${data.wishes.map(w=>`<li style="font-family:Fredoka;font-size:1.15rem"><span class="star">★</span><span>${esc(w.item)}${linkBtn(w.link)}</span><button class="x" data-del="${w.id}" aria-label="X">✕</button></li>`).join('')}
+    </ul>${wishFormHtml('')}
     <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
   </div>`);
   if(data.drawn) $('#reveal').onclick = () => { unlockAudio(); revealScene(data); };
-  $('#wishForm').onsubmit = async e => { e.preventDefault(); const v=$('#wishIn').value.trim(); if(!v) return;
-    const r = await rpc('ss_member_add_wishes', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin, p_items:[v]});
+  $('#wishForm').onsubmit = async e => { e.preventDefault(); const w = readWish(); if(!w) return;
+    const r = await rpc('ss_member_add_items', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin, p_items:[w]});
     if(r.error) return toast(t('unlockAgain')); memberView(); };
   view.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
     await rpc('ss_member_delete_wish', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin, p_wish:b.dataset.del}); memberView(); });
@@ -1213,20 +1234,23 @@ const GIFT = `<svg viewBox="0 0 200 200" width="190" height="190"><g id="giftLid
 <rect x="32" y="84" width="136" height="104" rx="6" fill="#c8102e"/><rect x="88" y="84" width="24" height="104" fill="#f5c542"/></svg>`;
 async function revealScene(data){
   rerender = () => {};
+  const my = ++sceneId;
   const ov = $('#overlay'); ov.classList.remove('hidden');
   ov.innerHTML = `<div class="gift-wrap" id="gift">${GIFT}</div><div class="ov-text">${t('ssUnwrap')}</div>`;
   jingle();
   let r;
   try{ r = await rpc('ss_reveal', {p_code:state.ssCode, p_member:state.ssMember.id, p_pin:state.ssPin}); }catch(e){ r = {error:'network'}; }
   setTimeout(()=>{
+    if(my !== sceneId) return;
     if(r.error){ ov.classList.add('hidden'); ov.innerHTML=''; toast(r.error==='network'?t('network'):t('unlockAgain')); return memberView(); }
     $('#gift').classList.add('open');
     setTimeout(()=>{
+      if(my !== sceneId) return;
       ov.innerHTML = `<div class="ov-text" style="margin-top:0">${t('ssYouGot')}</div>
         <div class="reveal-name">${esc(r.name)}</div>
         <div class="bubble" style="text-align:left">
           <b>${t('ssTheirList')}</b>
-          ${r.wishes.length ? `<ul style="margin:8px 0 0;padding-left:20px">${r.wishes.map(w=>`<li>${esc(w.item)}</li>`).join('')}</ul>` : `<p style="margin:8px 0 0">${t('ssNoList')}</p>`}
+          ${r.wishes.length ? `<ul style="margin:8px 0 0;padding-left:20px">${r.wishes.map(w=>`<li>${esc(w.item)}${linkBtn(w.link, t('shopIt'))}</li>`).join('')}</ul>` : `<p style="margin:8px 0 0">${t('ssNoList')}</p>`}
           ${data.budget || data.exchange_date ? `<p style="margin:10px 0 0;color:#7a6a4a">${data.budget ? t('ssBudgetLabel',{b:esc(data.budget)}) : ''}${data.budget && data.exchange_date ? ' · ' : ''}${data.exchange_date ? t('ssDateLabel',{d:fmtDay(data.exchange_date)}) : ''}</p>` : ''}
         </div>
         <p class="ov-text" style="font-size:1.4rem">${t('ssShh')}</p>
@@ -1329,6 +1353,7 @@ function readHash(){
   return m[1].toUpperCase();
 }
 async function boot(code){
+  sceneId++; const ov = $('#overlay'); if(ov){ ov.classList.add('hidden'); ov.innerHTML=''; }
   applyStatic();
   if(code && await openCode(code)) return;
   if(state.code && await openCode(state.code)) return;
