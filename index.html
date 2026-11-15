@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1a3a">
+<title>North Pole Wish Station</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#c8102e; --red-d:#8e0b20; --green:#0f6b3a; --green-d:#0a4a28;
+  --gold:#f5c542; --gold-d:#c99a1c; --snow:#fffdf7; --cream:#fdf6e3;
+  --night1:#0b1a3a; --night2:#1b2d63; --ink:#3a1f14;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:'Fredoka',system-ui,sans-serif;color:var(--snow);
+  background:radial-gradient(ellipse at 50% -10%,#3b4f9a 0%,var(--night2) 35%,var(--night1) 75%) fixed;
+  min-height:100vh;overflow-x:hidden;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+#snow{position:fixed;inset:0;pointer-events:none;z-index:1}
+.lights{position:fixed;top:0;left:0;right:0;height:56px;z-index:3;pointer-events:none}
+.lights svg{width:100%;height:100%}
+.bulb{animation:twinkle 1.6s infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:1;filter:drop-shadow(0 0 6px currentColor)}50%{opacity:.35;filter:none}}
+.ground{position:fixed;left:0;right:0;bottom:0;height:120px;z-index:0;pointer-events:none}
+.ground svg{width:100%;height:100%}
+main{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:70px 18px 150px}
+h1.title{
+  font-family:'Mountains of Christmas',cursive;font-weight:700;text-align:center;
+  font-size:clamp(2.6rem,9vw,4.4rem);line-height:1;margin:.2em 0 .1em;color:var(--gold);
+  text-shadow:0 0 18px rgba(245,197,66,.55),0 3px 0 var(--red-d),0 6px 14px rgba(0,0,0,.5);
+  letter-spacing:.02em;
+}
+.sub{text-align:center;font-size:1.1rem;opacity:.9;margin:0 0 18px}
+.card{
+  background:var(--cream);color:var(--ink);border-radius:22px;padding:22px;margin:18px 0;
+  position:relative;box-shadow:0 10px 30px rgba(0,0,0,.45);
+  border:6px solid transparent;
+  background-image:linear-gradient(var(--cream),var(--cream)),repeating-linear-gradient(45deg,var(--red) 0 14px,#fff 14px 28px);
+  background-origin:border-box;background-clip:padding-box,border-box;
+}
+.card h2{font-family:'Mountains of Christmas',cursive;font-size:2rem;margin:0 0 10px;color:var(--red);text-align:center}
+.card p{margin:.4em 0}
+.holly{position:absolute;top:-22px;left:-16px;width:62px;height:52px}
+/* countdown */
+.countdown{display:flex;gap:10px;justify-content:center;margin:10px 0 6px;flex-wrap:wrap}
+.cd{background:linear-gradient(180deg,var(--red),var(--red-d));border:3px solid var(--gold);border-radius:16px;
+  min-width:74px;padding:8px 6px 6px;text-align:center;box-shadow:0 6px 0 var(--red-d),0 10px 20px rgba(0,0,0,.4)}
+.cd b{display:block;font-size:2.2rem;line-height:1;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.cd span{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--gold)}
+.cd-label{text-align:center;font-family:'Mountains of Christmas',cursive;font-size:1.6rem;color:#fff;margin-top:6px}
+/* forms */
+label{display:block;font-weight:600;margin:12px 0 6px}
+input[type=text],input[type=tel],input[type=password]{
+  width:100%;font:inherit;font-size:1.15rem;padding:13px 14px;border-radius:14px;border:3px solid #e2c98f;
+  background:#fff;color:var(--ink);outline:none;
+}
+input:focus{border-color:var(--green)}
+.code-input{text-transform:uppercase;letter-spacing:.3em;text-align:center;font-weight:700;font-size:1.6rem!important}
+.btn{
+  font:inherit;font-weight:700;font-size:1.15rem;border:0;cursor:pointer;border-radius:999px;padding:14px 24px;
+  color:#fff;background:linear-gradient(180deg,#e0263f,var(--red));box-shadow:0 5px 0 var(--red-d),0 8px 16px rgba(0,0,0,.3);
+  transition:transform .08s;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--red-d)}
+.btn.green{background:linear-gradient(180deg,#178a4c,var(--green));box-shadow:0 5px 0 var(--green-d),0 8px 16px rgba(0,0,0,.3)}
+.btn.gold{background:linear-gradient(180deg,#ffd966,var(--gold-d));color:var(--ink);box-shadow:0 5px 0 #8c6a0e,0 8px 16px rgba(0,0,0,.3)}
+.btn.ghost{background:transparent;color:var(--red);box-shadow:none;border:3px solid var(--red);padding:10px 18px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55;pointer-events:none}
+.btn.cane{background:repeating-linear-gradient(-45deg,var(--red) 0 16px,#fff 16px 32px);color:#fff;font-size:1.25rem;padding:16px 24px}.btn.cane span{background:var(--red);border-radius:999px;padding:4px 14px;box-shadow:0 0 0 3px var(--gold)}
+.row{display:flex;gap:10px;align-items:center}
+.row>input{flex:1}
+.stack>*+*{margin-top:12px}
+.link{background:none;border:0;color:var(--gold);font:inherit;text-decoration:underline;cursor:pointer;padding:6px}
+.card .link{color:var(--green)}
+.err{color:var(--red);font-weight:600;min-height:1.3em;margin-top:8px;text-align:center}
+.center{text-align:center}
+.hidden{display:none!important}
+/* kids */
+.kids{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:10px}.kids .kid{flex:0 1 150px}
+.kid{border:0;cursor:pointer;font:inherit;border-radius:22px;padding:16px 10px 14px;color:var(--ink);background:var(--cream);
+  box-shadow:0 8px 0 #c9b27a,0 12px 22px rgba(0,0,0,.35);transition:transform .1s}
+.kid:active{transform:translateY(4px)}
+.kid .orn{width:84px;height:96px;margin:0 auto 6px;display:block}
+.kid b{font-size:1.35rem}
+.parent-door{margin-top:26px;text-align:center}
+/* letter */
+.paper{
+  background:#fffaf0;color:var(--ink);border-radius:8px;padding:26px 22px 22px;margin:18px 0;position:relative;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+  background-image:repeating-linear-gradient(transparent 0 37px,#d9e3f0 37px 38px);background-position:0 70px;
+  border-left:8px double var(--red);
+}
+.paper .greet{font-family:'Caveat',cursive;font-size:2.1rem;line-height:1.1;margin:0 0 6px;color:var(--red-d)}
+.wish-list{list-style:none;padding:0;margin:8px 0 14px}
+.wish-list li{font-family:'Caveat',cursive;font-size:1.75rem;line-height:38px;display:flex;align-items:center;gap:10px}
+.wish-list li .star{color:var(--gold-d);font-size:1.2rem}
+.wish-list li.pending{color:var(--green)}
+.wish-list li .x{margin-left:auto;border:0;background:none;color:#a33;font-size:1.4rem;cursor:pointer}
+.tip{font-size:.95rem;background:#eaf6ee;color:var(--green-d);border-radius:12px;padding:10px 12px;margin-top:10px;display:flex;gap:8px;align-items:center}
+.sign{font-family:'Caveat',cursive;font-size:1.8rem;text-align:right;margin-top:6px}
+/* overlay */
+.overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:radial-gradient(circle at 50% 40%,#22377a,#070d24 75%);padding:20px;text-align:center;overflow:auto}
+.envelope{width:200px;height:140px;position:relative}
+.envelope.fly{animation:fly 1.6s cubic-bezier(.5,-0.3,.7,0) forwards}
+@keyframes fly{0%{transform:translate(0,0) rotate(0) scale(1)}30%{transform:translate(-20px,20px) rotate(-8deg) scale(1.05)}100%{transform:translate(60vw,-80vh) rotate(25deg) scale(.2);opacity:0}}
+.envelope.seal{animation:pop .6s ease-out}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+.ov-text{font-family:'Mountains of Christmas',cursive;font-size:2rem;color:var(--gold);margin-top:18px;min-height:2.4em}
+.santa-wrap{position:relative;width:min(320px,80vw);animation:rise .9s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes rise{from{transform:translateY(60px) scale(.6);opacity:0}to{transform:none;opacity:1}}
+.santa-wrap svg{width:100%;height:auto;display:block}
+#santaArm{transform-origin:232px 238px;animation:wave 1s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+#santaEyes{transform-origin:160px 132px;animation:blink 4s infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+#santaMouth{transform-origin:160px 176px;transition:transform .08s}
+.santa-body{animation:jolly .5s ease-in-out infinite alternate}
+.talking .santa-body{animation-duration:.25s}
+@keyframes jolly{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+.bubble{background:#fff;color:var(--ink);border-radius:24px;padding:16px 20px;max-width:420px;font-size:1.25rem;font-weight:600;
+  position:relative;margin:18px auto 0;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:pop .5s .5s both}
+.bubble:before{content:"";position:absolute;top:-16px;left:50%;margin-left:-14px;border:14px solid transparent;border-top:0;border-bottom-color:#fff;border-bottom-width:18px}
+.bubble b{color:var(--red)}
+.ov-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:22px}
+#burst{position:fixed;inset:0;pointer-events:none;z-index:21}
+/* pin pad */
+.dots{display:flex;gap:14px;justify-content:center;margin:12px 0 4px}
+.dot{width:20px;height:20px;border-radius:50%;border:3px solid var(--red);background:transparent;transition:background .1s}
+.dot.on{background:var(--red)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:300px;margin:14px auto 0}
+.pad button{font:inherit;font-size:1.7rem;font-weight:700;padding:14px 0;border-radius:18px;border:0;cursor:pointer;
+  background:#fff;color:var(--ink);box-shadow:0 5px 0 #d6c48f}
+.pad button:active{transform:translateY(3px);box-shadow:0 2px 0 #d6c48f}
+.pad .go{background:var(--green);color:#fff;box-shadow:0 5px 0 var(--green-d)}
+/* parent */
+.kidsec{margin:18px 0;border-top:3px dashed #e2c98f;padding-top:14px}
+.kidsec h3{margin:0;font-size:1.4rem;color:var(--green-d);display:flex;align-items:center;gap:10px}
+.kidsec h3 .pill{font-size:.85rem;background:var(--green);color:#fff;border-radius:999px;padding:3px 10px}
+.pw{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid #eadbb5}
+.pw input[type=checkbox]{width:28px;height:28px;accent-color:var(--green);flex:none}
+.pw .it{flex:1;font-size:1.1rem}
+.pw .dt{font-size:.8rem;color:#8a7a5a;display:block}
+.pw.bought .it{text-decoration:line-through;color:#8a7a5a}
+.pw .del{border:0;background:none;color:#b33;font-size:1.3rem;cursor:pointer;padding:4px 8px}
+.codebox{font-size:2.4rem;font-weight:700;letter-spacing:.3em;text-align:center;color:var(--red);background:#fff;border:3px dashed var(--gold-d);border-radius:16px;padding:10px;margin:10px 0}
+.modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .card{max-width:380px;width:100%}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 20px;border-radius:999px;z-index:40;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.spinner{width:42px;height:42px;border:5px solid rgba(255,255,255,.25);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.bulb,#santaArm,.santa-body,#santaEyes{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+<div class="lights" aria-hidden="true"><svg id="lightsSvg" preserveAspectRatio="none"></svg></div>
+<div class="ground" aria-hidden="true">
+  <svg viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice">
+    <defs><linearGradient id="tg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#14532d"/><stop offset="1" stop-color="#0a2e1a"/></linearGradient></defs>
+    <g fill="url(#tg)">
+      <path d="M60 110 L95 20 L130 110Z"/><path d="M150 110 L175 50 L200 110Z"/><path d="M980 110 L1020 10 L1060 110Z"/>
+      <path d="M1080 110 L1105 45 L1130 110Z"/><path d="M880 110 L900 60 L920 110Z"/><path d="M260 110 L280 65 L300 110Z"/>
+    </g>
+    <g fill="#f5c542"><circle cx="95" cy="20" r="5"/><circle cx="1020" cy="10" r="6"/></g>
+    <path d="M0 95 Q150 70 300 92 T600 88 T900 94 T1200 86 V120 H0Z" fill="#f4f8ff"/>
+    <path d="M0 105 Q200 90 400 104 T800 100 T1200 102 V120 H0Z" fill="#dfe8f7"/>
+  </svg>
+</div>
+
+<main id="app">
+  <h1 class="title">North Pole<br>Wish Station</h1>
+  <p class="sub">Santa's official letter desk</p>
+  <div id="countdown"></div>
+  <div id="view"></div>
+</main>
+
+<div id="overlay" class="overlay hidden" role="dialog" aria-live="polite"></div>
+<canvas id="burst"></canvas>
+
+<script>
+/* ---------- config ---------- */
+const SB = 'https://jyyafrsoadmfjcziktdl.supabase.co';
+const KEY = 'sb_publishable_Cfnj1qF21E2lDx-tEe8fLQ_rBWH5LgZ';
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+async function rpc(fn, args){
+  const r = await fetch(`${SB}/rest/v1/rpc/${fn}`, {
+    method:'POST', headers:{apikey:KEY,'Content-Type':'application/json'}, body:JSON.stringify(args)
+  });
+  if(!r.ok) throw new Error('Network trouble at the North Pole. Try again.');
+  return r.json();
+}
+function toast(msg){
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2600);
+}
+const state = { code: store.get('np_code'), family: null, kid: null, pending: [], pin: null, parent: null };
+
+/* ---------- twinkle lights ---------- */
+function drawLights(){
+  const svg = $('#lightsSvg'); const w = window.innerWidth; const n = Math.max(8, Math.round(w/70));
+  svg.setAttribute('viewBox', `0 0 ${w} 56`);
+  const colors = ['#ff3b3b','#ffd93b','#3bff7a','#3bb4ff','#ff7af0'];
+  let path = `M0 6`; let bulbs='';
+  for(let i=0;i<n;i++){
+    const x0 = i*w/n, x1=(i+1)*w/n, mx=(x0+x1)/2;
+    path += ` Q${mx} 34 ${x1} 6`;
+    const c = colors[i%colors.length];
+    bulbs += `<g class="bulb" style="color:${c};animation-delay:${(i%5)*0.3}s"><rect x="${mx-3}" y="18" width="6" height="6" fill="#555"/><ellipse cx="${mx}" cy="33" rx="7" ry="11" fill="${c}"/></g>`;
+  }
+  svg.innerHTML = `<path d="${path}" stroke="#2b3a2b" stroke-width="2.5" fill="none"/>${bulbs}`;
+}
+drawLights(); addEventListener('resize', drawLights);
+
+/* ---------- snow ---------- */
+(function(){
+  const cv = $('#snow'), ctx = cv.getContext('2d'); let flakes=[], W, H;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){ W=cv.width=innerWidth; H=cv.height=innerHeight;
+    const n = Math.min(160, Math.round(W*H/9000));
+    flakes = Array.from({length:n}, ()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*3+1,s:Math.random()*0.8+0.4,d:Math.random()*Math.PI*2})); }
+  function tick(){ ctx.clearRect(0,0,W,H); ctx.fillStyle='rgba(255,255,255,.9)';
+    for(const f of flakes){ f.y+=f.s; f.d+=0.01; f.x+=Math.sin(f.d)*0.5;
+      if(f.y>H+5){f.y=-5;f.x=Math.random()*W}
+      ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,7); ctx.fill(); }
+    if(!reduce) requestAnimationFrame(tick); }
+  size(); addEventListener('resize', size); tick();
+})();
+
+/* ---------- countdown ---------- */
+function christmasTarget(){
+  const now = new Date(); let y = now.getFullYear();
+  if(now.getMonth()===11 && now.getDate()>25) y++;
+  return new Date(y,11,25,0,0,0);
+}
+function renderCountdown(){
+  const now = new Date(), el = $('#countdown');
+  if(now.getMonth()===11 && now.getDate()===25){
+    el.innerHTML = `<div class="cd-label" style="font-size:2.4rem;color:var(--gold)">Merry Christmas!</div>`; return;
+  }
+  let ms = christmasTarget() - now;
+  const d=Math.floor(ms/864e5); ms%=864e5; const h=Math.floor(ms/36e5); ms%=36e5; const m=Math.floor(ms/6e4); const s=Math.floor(ms%6e4/1e3);
+  el.innerHTML = `<div class="countdown">
+    <div class="cd"><b>${d}</b><span>Days</span></div><div class="cd"><b>${h}</b><span>Hours</span></div>
+    <div class="cd"><b>${m}</b><span>Min</span></div><div class="cd"><b>${s}</b><span>Sec</span></div></div>
+    <div class="cd-label">until Santa's sleigh takes off!</div>`;
+}
+renderCountdown(); setInterval(renderCountdown, 1000);
+
+/* ---------- art ---------- */
+const HOLLY = `<svg class="holly" viewBox="0 0 62 52"><path d="M30 26 C18 10 6 18 2 8 C10 14 14 4 20 10 C22 4 28 6 30 26Z" fill="#0f6b3a"/><path d="M32 26 C44 10 56 18 60 8 C52 14 48 4 42 10 C40 4 34 6 32 26Z" fill="#14803f"/><circle cx="26" cy="30" r="6" fill="#c8102e"/><circle cx="36" cy="30" r="6" fill="#e0263f"/><circle cx="31" cy="38" r="6" fill="#c8102e"/></svg>`;
+const ORN_COLORS = [['#c8102e','#8e0b20'],['#0f6b3a','#0a4a28'],['#d4a017','#9c7410'],['#1f5fbf','#123a7a'],['#9b30c8','#5e1a7c']];
+function ornament(name,i){
+  const [a,b] = ORN_COLORS[i%ORN_COLORS.length];
+  return `<svg class="orn" viewBox="0 0 84 96"><rect x="34" y="4" width="16" height="12" rx="3" fill="#d4af37"/><path d="M42 0 v6" stroke="#d4af37" stroke-width="3"/>
+  <circle cx="42" cy="56" r="38" fill="${a}"/><circle cx="42" cy="56" r="38" fill="url(#none)" stroke="${b}" stroke-width="3"/>
+  <path d="M10 80 Q42 94 74 80" stroke="#fff" stroke-opacity=".6" stroke-width="4" fill="none"/>
+  <ellipse cx="28" cy="38" rx="9" ry="6" fill="#fff" opacity=".35"/>
+  <text x="42" y="70" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="30" fill="#fff">${esc(name.charAt(0).toUpperCase())}</text></svg>`;
+}
+const ENVELOPE = `<svg viewBox="0 0 200 140" width="200" height="140"><rect x="4" y="10" width="192" height="126" rx="10" fill="#fff4dc" stroke="#c99a1c" stroke-width="4"/>
+<path d="M4 18 L100 84 L196 18" fill="#f3e2b8" stroke="#c99a1c" stroke-width="4"/><circle cx="100" cy="84" r="18" fill="#c8102e"/><path d="M92 80 l8 10 l8-10" stroke="#fff" stroke-width="3" fill="none"/>
+<text x="100" y="128" text-anchor="middle" font-family="Mountains of Christmas" font-weight="700" font-size="18" fill="#8e0b20">To: Santa, North Pole</text></svg>`;
+const SANTA = `<svg viewBox="0 0 320 340" aria-label="Santa waving">
+<g class="santa-body">
+  <ellipse cx="160" cy="300" rx="120" ry="70" fill="#c8102e"/>
+  <rect x="60" y="290" width="200" height="26" fill="#2b1a10"/><rect x="142" y="286" width="36" height="34" rx="4" fill="#f5c542"/><rect x="152" y="294" width="16" height="18" fill="#2b1a10"/>
+  <path d="M160 240 v100" stroke="#fff" stroke-width="22"/>
+  <g id="santaArm"><path d="M232 250 Q268 210 262 168" stroke="#c8102e" stroke-width="36" stroke-linecap="round" fill="none"/>
+    <rect x="244" y="176" width="38" height="14" rx="7" fill="#fff" transform="rotate(-10 263 183)"/>
+    <circle cx="262" cy="156" r="20" fill="#1e2b1e"/></g>
+  <path d="M88 250 Q60 280 70 310" stroke="#c8102e" stroke-width="36" stroke-linecap="round" fill="none"/>
+  <circle cx="160" cy="135" r="62" fill="#f6c9a8"/>
+  <g fill="#fff"><circle cx="100" cy="170" r="30"/><circle cx="220" cy="170" r="30"/><circle cx="125" cy="205" r="34"/><circle cx="195" cy="205" r="34"/><circle cx="160" cy="225" r="40"/><circle cx="110" cy="140" r="18"/><circle cx="210" cy="140" r="18"/></g>
+  <ellipse id="santaMouth" cx="160" cy="176" rx="14" ry="8" fill="#7a1020"/>
+  <path d="M126 162 Q145 150 160 164 Q175 150 194 162 Q178 176 160 168 Q142 176 126 162Z" fill="#fff" stroke="#e8e8e8"/>
+  <circle cx="160" cy="146" r="11" fill="#e89b86"/>
+  <circle cx="122" cy="150" r="11" fill="#f29c9c" opacity=".7"/><circle cx="198" cy="150" r="11" fill="#f29c9c" opacity=".7"/>
+  <g id="santaEyes" fill="#2b1a10"><ellipse cx="140" cy="130" rx="6" ry="8"/><ellipse cx="180" cy="130" rx="6" ry="8"/><circle cx="142" cy="127" r="2" fill="#fff"/><circle cx="182" cy="127" r="2" fill="#fff"/></g>
+  <path d="M128 116 q12 -8 24 0 M168 116 q12 -8 24 0" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M96 100 Q120 20 200 30 Q250 40 262 90 Q240 70 222 80 L224 100Z" fill="#c8102e"/>
+  <rect x="90" y="92" width="140" height="24" rx="12" fill="#fff"/>
+  <circle cx="262" cy="94" r="16" fill="#fff"/>
+</g></svg>`;
+
+/* ---------- audio (sleigh bells + Santa voice) ---------- */
+let actx = null;
+function unlockAudio(){
+  try{ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){}
+}
+function jingle(){
+  if(!actx) return; const t0 = actx.currentTime;
+  for(let i=0;i<14;i++){
+    const t = t0 + i*0.11 + (i%2?0.02:0);
+    [2600,3400,4200].forEach(f=>{
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.type='triangle'; o.frequency.value = f*(0.95+Math.random()*0.1);
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.06,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t+0.2);
+    });
+  }
+}
+const voiceCache = {};
+function fetchVoice(kid){
+  if(voiceCache[kid.id]) return voiceCache[kid.id];
+  voiceCache[kid.id] = fetch(`${SB}/functions/v1/santa-voice`, {
+    method:'POST', headers:{apikey:KEY,'Content-Type':'application/json'}, body:JSON.stringify({code:state.code, kid_id:kid.id})
+  }).then(r=>r.json()).then(j=>{ if(!j.url) throw new Error(j.error||'no voice'); return fetch(j.url); })
+    .then(r=>r.arrayBuffer()).catch(e=>{ delete voiceCache[kid.id]; throw e; });
+  return voiceCache[kid.id];
+}
+let lastBuffer = null;
+async function playSanta(kid){
+  const wrap = $('.santa-wrap'); const mouth = document.getElementById('santaMouth');
+  const talk = on => { if(wrap) wrap.classList.toggle('talking', on); };
+  try{
+    if(!lastBuffer){ const ab = await fetchVoice(kid); lastBuffer = await actx.decodeAudioData(ab.slice(0)); }
+    const src = actx.createBufferSource(); src.buffer = lastBuffer;
+    const an = actx.createAnalyser(); an.fftSize = 256; src.connect(an); an.connect(actx.destination);
+    const data = new Uint8Array(an.frequencyBinCount); let playing = true;
+    src.onended = ()=>{ playing=false; talk(false); if(mouth) mouth.style.transform='scaleY(1)'; };
+    src.start(); talk(true);
+    (function loop(){ if(!playing) return; an.getByteFrequencyData(data);
+      let s=0; for(let i=2;i<40;i++) s+=data[i]; const lvl=Math.min(1,s/(38*140));
+      if(mouth) mouth.style.transform=`scaleY(${0.6+lvl*2.6})`; requestAnimationFrame(loop); })();
+  }catch(e){
+    // fallback: device voice
+    try{
+      const u = new SpeechSynthesisUtterance(`Ho ho ho! Thank you for your letter, ${kid.name}! Merry Christmas!`);
+      u.pitch = 0.5; u.rate = 0.85; talk(true); u.onend = ()=>talk(false); speechSynthesis.speak(u);
+    }catch(_){}
+  }
+}
+
+/* ---------- confetti / star burst ---------- */
+function burst(){
+  const cv=$('#burst'), ctx=cv.getContext('2d'); cv.width=innerWidth; cv.height=innerHeight;
+  const cols=['#f5c542','#c8102e','#fff','#3bff7a','#ff7af0'];
+  const ps=Array.from({length:140},()=>({x:innerWidth/2,y:innerHeight*0.45,vx:(Math.random()-.5)*14,vy:Math.random()*-14-3,r:Math.random()*5+3,c:cols[Math.random()*cols.length|0],a:Math.random()*6}));
+  let f=0; (function tick(){ ctx.clearRect(0,0,cv.width,cv.height);
+    ps.forEach(p=>{p.vy+=0.35;p.x+=p.vx;p.y+=p.vy;p.a+=0.2; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.fillStyle=p.c;
+      ctx.beginPath(); for(let i=0;i<5;i++){const an=i*1.2566-1.5708; ctx.lineTo(Math.cos(an)*p.r,Math.sin(an)*p.r); ctx.lineTo(Math.cos(an+.628)*p.r*.45,Math.sin(an+.628)*p.r*.45);} ctx.fill(); ctx.restore();});
+    if(++f<150) requestAnimationFrame(tick); else ctx.clearRect(0,0,cv.width,cv.height); })();
+}
+
+/* ---------- views ---------- */
+const view = $('#view');
+function setView(html){ view.innerHTML = html; window.scrollTo({top: 0, behavior:'smooth'}); }
+
+function homeView(){
+  state.kid=null; state.pin=null; state.parent=null;
+  setView(`
+  <div class="card">${HOLLY}
+    <h2>Welcome, friend!</h2>
+    <p class="center">Enter your family code to write to Santa.</p>
+    <form id="codeForm" class="stack">
+      <input id="codeIn" class="code-input" type="text" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="ABC123" value="${esc(state.code||'')}">
+      <button class="btn green block" type="submit">Open the Workshop Door</button>
+      <div class="err" id="codeErr"></div>
+    </form>
+  </div>
+  <div class="card center">
+    <h2>New family?</h2>
+    <p>Parents, set up your family in one minute. You'll get a code to share.</p>
+    <button class="btn gold" id="toSetup">Set Up My Family</button>
+  </div>`);
+  $('#codeForm').onsubmit = async e => { e.preventDefault();
+    const c = $('#codeIn').value.trim().toUpperCase(); if(c.length!==6){ $('#codeErr').textContent='Family codes have 6 letters and numbers.'; return; }
+    await openFamily(c, $('#codeErr'));
+  };
+  $('#toSetup').onclick = setupView;
+}
+
+async function openFamily(code, errEl){
+  try{
+    if(errEl) errEl.textContent='';
+    const fam = await rpc('np_get_family', {p_code: code});
+    if(!fam){ if(errEl) errEl.textContent = "Hmm, the elves can't find that code. Check with your parents."; return; }
+    state.code = code; state.family = fam; store.set('np_code', code); familyView();
+  }catch(e){ if(errEl) errEl.textContent = e.message; }
+}
+
+function setupView(){
+  setView(`
+  <div class="card">${HOLLY}
+    <h2>Set Up Your Family</h2>
+    <form id="setupForm">
+      <label>Family name</label><input type="text" id="fName" maxlength="40" placeholder="The Lozano Family">
+      <label>Your name (parent)</label><input type="text" id="pName" maxlength="40" placeholder="Mom, Dad, Grandma...">
+      <label>Kids writing to Santa</label>
+      <div id="kidRows" class="stack"></div>
+      <button type="button" class="link" id="addKidRow">+ Add another child</button>
+      <label>Parent PIN (4 to 6 numbers)</label>
+      <input type="tel" inputmode="numeric" id="pin1" maxlength="6" placeholder="Kids should not know this" autocomplete="off">
+      <label>Type the PIN again</label>
+      <input type="tel" inputmode="numeric" id="pin2" maxlength="6" autocomplete="off">
+      <div class="err" id="setupErr"></div>
+      <button class="btn green block" type="submit" id="setupBtn">Create My Family</button>
+      <p class="center"><button type="button" class="link" id="back">Back</button></p>
+    </form>
+  </div>`);
+  const addRow = (v='') => { const d=document.createElement('div'); d.className='row';
+    d.innerHTML=`<input type="text" class="kidName" maxlength="30" placeholder="Child's first name" value="${esc(v)}"><button type="button" class="btn ghost" aria-label="Remove">✕</button>`;
+    d.querySelector('button').onclick=()=>{ if($('#kidRows').children.length>1) d.remove(); }; $('#kidRows').appendChild(d); };
+  addRow();
+  $('#addKidRow').onclick = ()=>{ if($('#kidRows').children.length<10) addRow(); };
+  $('#back').onclick = homeView;
+  $('#setupForm').onsubmit = async e => { e.preventDefault();
+    const err = $('#setupErr'); err.textContent='';
+    const fName=$('#fName').value.trim(), pName=$('#pName').value.trim(), p1=$('#pin1').value.trim(), p2=$('#pin2').value.trim();
+    const kids=[...document.querySelectorAll('.kidName')].map(i=>i.value.trim()).filter(Boolean);
+    if(!fName) return err.textContent='Add a family name.';
+    if(!pName) return err.textContent='Add your name.';
+    if(!kids.length) return err.textContent='Add at least one child.';
+    if(!/^\d{4,6}$/.test(p1)) return err.textContent='PIN must be 4 to 6 numbers.';
+    if(p1!==p2) return err.textContent="The PINs don't match.";
+    $('#setupBtn').disabled=true;
+    try{
+      const r = await rpc('np_create_family', {p_family_name:fName, p_parent_name:pName, p_pin:p1, p_kids:kids});
+      if(r.error) { err.textContent = r.error==='full' ? 'The workshop is full. Ask the site owner.' : 'Please check the form.'; $('#setupBtn').disabled=false; return; }
+      state.code = r.code; store.set('np_code', r.code);
+      codeView(r.code);
+    }catch(ex){ err.textContent=ex.message; $('#setupBtn').disabled=false; }
+  };
+}
+
+function codeView(code){
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>You're on the Nice List!</h2>
+    <p>Your family code is:</p>
+    <div class="codebox">${esc(code)}</div>
+    <p>Save it. Share it with anyone in your family who helps the kids write. Keep your PIN private.</p>
+    <div class="stack">
+      <button class="btn gold block" id="copyCode">Copy Code</button>
+      <button class="btn green block" id="go">Start Writing to Santa</button>
+    </div>
+  </div>`);
+  $('#copyCode').onclick = async ()=>{ try{ await navigator.clipboard.writeText(code); toast('Code copied!'); }catch(e){ toast('Write it down: '+code); } };
+  $('#go').onclick = ()=>openFamily(code);
+}
+
+function familyView(){
+  const f = state.family;
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>${esc(f.family_name)}</h2>
+    <p style="font-size:1.2rem">Who is writing to Santa today?</p>
+    <div class="kids">${f.kids.map((k,i)=>`<button class="kid" data-i="${i}">${ornament(k.name,i)}<b>${esc(k.name)}</b></button>`).join('')}</div>
+    <div class="parent-door">
+      <button class="btn ghost" id="toParent">Grown-ups Only</button>
+    </div>
+    <p><button class="link" id="switch">Not your family? Switch</button></p>
+  </div>`);
+  view.querySelectorAll('.kid').forEach(b => b.onclick = () => { unlockAudio(); letterView(f.kids[+b.dataset.i]); });
+  $('#toParent').onclick = pinView;
+  $('#switch').onclick = ()=>{ store.del('np_code'); state.code=null; homeView(); };
+}
+
+async function letterView(kid){
+  state.kid = kid; state.pending = []; lastBuffer = null;
+  fetchVoice(kid).catch(()=>{}); // warm up Santa's voice
+  setView(`<div class="spinner"></div>`);
+  let wishes = [];
+  try{ wishes = await rpc('np_kid_wishes', {p_code:state.code, p_kid_id:kid.id}); }catch(e){}
+  setView(`
+  <div class="paper">
+    <p class="greet">Dear Santa,</p>
+    <p style="font-family:Caveat,cursive;font-size:1.7rem;margin:0 0 6px">My name is ${esc(kid.name)}. This year I wish for...</p>
+    <ul class="wish-list" id="wl">
+      ${wishes.map(w=>`<li><span class="star">★</span>${esc(w.item)}</li>`).join('')}
+    </ul>
+    <form id="wishForm" class="row">
+      <input type="text" id="wishIn" maxlength="120" placeholder="Type a wish..." autocomplete="off">
+      <button class="btn green" type="submit" aria-label="Add wish">Add</button>
+    </form>
+    <div class="tip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+      Can't spell it? Tap the microphone on your keyboard and say it out loud!</div>
+    <p class="sign">Love, ${esc(kid.name)}</p>
+    <div class="err" id="sendErr"></div>
+    <button class="btn cane block" id="sendBtn" disabled><span>Send My Letter to Santa!</span></button>
+    <p class="center"><button class="link" id="back" style="color:var(--green)">Back</button></p>
+  </div>`);
+  const wl = $('#wl'), sendBtn = $('#sendBtn');
+  const renderPending = () => {
+    wl.querySelectorAll('li.pending').forEach(li=>li.remove());
+    state.pending.forEach((p,i)=>{ const li=document.createElement('li'); li.className='pending';
+      li.innerHTML=`<span class="star">✦</span>${esc(p)}<button class="x" aria-label="Remove">✕</button>`;
+      li.querySelector('.x').onclick=()=>{ state.pending.splice(i,1); renderPending(); }; wl.appendChild(li); });
+    sendBtn.disabled = state.pending.length===0;
+  };
+  $('#wishForm').onsubmit = e => { e.preventDefault(); const v=$('#wishIn').value.trim();
+    if(!v) return; if(state.pending.length>=20) return; state.pending.push(v); $('#wishIn').value=''; renderPending(); $('#wishIn').focus(); };
+  $('#back').onclick = familyView;
+  sendBtn.onclick = async () => {
+    const extra = $('#wishIn').value.trim(); if(extra){ state.pending.push(extra); $('#wishIn').value=''; }
+    if(!state.pending.length) return;
+    unlockAudio(); jingle(); sendBtn.disabled = true;
+    try{
+      const r = await rpc('np_add_wishes', {p_code:state.code, p_kid_id:kid.id, p_items:state.pending});
+      if(r.error) throw new Error('Santa could not find your name. Ask a grown-up.');
+      state.pending = [];
+      sendAnimation(kid);
+    }catch(e){ $('#sendErr').textContent = e.message; sendBtn.disabled=false; }
+  };
+}
+
+function sendAnimation(kid){
+  const ov = $('#overlay'); ov.classList.remove('hidden');
+  ov.innerHTML = `<div class="envelope seal" id="env">${ENVELOPE}</div><div class="ov-text">Sealing your letter...</div>`;
+  setTimeout(()=>{ $('.ov-text').textContent='Whoosh! Off to the North Pole!'; jingle(); $('#env').classList.add('fly'); }, 1300);
+  setTimeout(()=>{
+    ov.innerHTML = `<div class="santa-wrap">${SANTA}</div>
+      <div class="bubble">Ho ho ho! Thank you for your letter, <b>${esc(kid.name)}</b>!</div>
+      <div class="ov-actions"><button class="btn gold" id="again">Hear Santa Again</button><button class="btn green" id="done">Back to My Letter</button></div>`;
+    burst(); playSanta(kid);
+    $('#again').onclick = ()=>{ unlockAudio(); playSanta(kid); };
+    $('#done').onclick = ()=>{ ov.classList.add('hidden'); ov.innerHTML=''; letterView(kid); };
+  }, 3000);
+}
+
+/* ---------- parent ---------- */
+function pinView(){
+  let pin='';
+  setView(`
+  <div class="card center">${HOLLY}
+    <h2>Grown-ups Only</h2>
+    <p>Enter your parent PIN.</p>
+    <div class="dots" id="dots"></div>
+    <div class="err" id="pinErr"></div>
+    <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-k="${n}">${n}</button>`).join('')}
+      <button data-k="back" aria-label="Delete">⌫</button><button data-k="0">0</button><button data-k="go" class="go" aria-label="Enter">✓</button></div>
+    <p><button class="link" id="back">Back</button></p>
+  </div>`);
+  const dots = () => { $('#dots').innerHTML = Array.from({length:Math.max(4,pin.length)},(_,i)=>`<span class="dot ${i<pin.length?'on':''}"></span>`).join(''); };
+  dots();
+  const submit = async () => {
+    if(pin.length<4) return;
+    try{
+      const r = await rpc('np_parent_view', {p_code:state.code, p_pin:pin});
+      if(r.error){ $('#pinErr').textContent = r.error==='locked' ? 'Too many tries. Wait 10 minutes.' : 'Wrong PIN. Try again.'; pin=''; dots(); return; }
+      state.pin = pin; state.parent = r; parentView();
+    }catch(e){ $('#pinErr').textContent = e.message; }
+  };
+  $('#pad').onclick = e => { const k = e.target.closest('button')?.dataset.k; if(!k) return;
+    if(k==='back') pin=pin.slice(0,-1); else if(k==='go') return submit(); else if(pin.length<6) pin+=k;
+    $('#pinErr').textContent=''; dots(); };
+  $('#back').onclick = familyView;
+}
+
+async function refreshParent(){
+  const r = await rpc('np_parent_view', {p_code:state.code, p_pin:state.pin});
+  if(r.error){ toast('Please unlock again'); return pinView(); }
+  state.parent = r; parentView(true);
+}
+
+function parentView(keepScroll){
+  const p = state.parent; const y = scrollY;
+  const total = p.kids.reduce((a,k)=>a+k.wishes.length,0), bought = p.kids.reduce((a,k)=>a+k.wishes.filter(w=>w.bought).length,0);
+  const fmt = d => new Date(d).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  view.innerHTML = `
+  <div class="card">${HOLLY}
+    <h2>Santa's Secret Ledger</h2>
+    <p class="center">${esc(p.family_name)} · ${bought} of ${total} gifts checked off</p>
+    <p class="center" style="font-size:.9rem;color:#7a6a4a">Checkmarks are private. Kids never see them.</p>
+    ${p.kids.map(k=>`
+      <div class="kidsec">
+        <h3>${esc(k.name)} <span class="pill">${k.wishes.filter(w=>w.bought).length}/${k.wishes.length}</span></h3>
+        ${k.wishes.length ? k.wishes.map(w=>`
+          <div class="pw ${w.bought?'bought':''}">
+            <input type="checkbox" data-w="${w.id}" ${w.bought?'checked':''} aria-label="Bought">
+            <span class="it">${esc(w.item)}<span class="dt">Asked ${fmt(w.created_at)}</span></span>
+            <button class="del" data-del="${w.id}" data-name="${esc(w.item)}" aria-label="Delete">✕</button>
+          </div>`).join('') : `<p style="color:#8a7a5a">No wishes yet.</p>`}
+        <p style="text-align:right;margin:6px 0 0"><button class="link" data-rmkid="${k.id}" data-name="${esc(k.name)}" style="color:#b33;font-size:.9rem">Remove ${esc(k.name)}</button></p>
+      </div>`).join('')}
+    <div class="kidsec">
+      <form id="addKid" class="row"><input type="text" id="newKid" maxlength="30" placeholder="Add a child"><button class="btn green" type="submit">Add</button></form>
+    </div>
+    <div class="stack" style="margin-top:18px">
+      <button class="btn gold block" id="copyCode">Copy Family Code (${esc(state.code)})</button>
+      <button class="btn block" id="lock">Lock and Return to Kids</button>
+    </div>
+  </div>`;
+  if(keepScroll) scrollTo(0,y); else scrollTo({top:0,behavior:'smooth'});
+  view.querySelectorAll('input[type=checkbox][data-w]').forEach(cb => cb.onchange = async () => {
+    cb.closest('.pw').classList.toggle('bought', cb.checked);
+    try{ const r = await rpc('np_parent_set_bought', {p_code:state.code, p_pin:state.pin, p_wish_id:cb.dataset.w, p_bought:cb.checked}); if(r.error) throw 0; await refreshParent(); }
+    catch(e){ toast('Could not save. Try again.'); cb.checked=!cb.checked; }
+  });
+  view.querySelectorAll('[data-del]').forEach(b => b.onclick = () => confirmBox(`Delete "${b.dataset.name}"?`, async () => {
+    await rpc('np_parent_delete_wish', {p_code:state.code, p_pin:state.pin, p_wish_id:b.dataset.del}); await refreshParent(); }));
+  view.querySelectorAll('[data-rmkid]').forEach(b => b.onclick = () => confirmBox(`Remove ${b.dataset.name} and their whole list?`, async () => {
+    await rpc('np_parent_remove_kid', {p_code:state.code, p_pin:state.pin, p_kid_id:b.dataset.rmkid}); await refreshParent(); state.family = await rpc('np_get_family',{p_code:state.code}); }));
+  $('#addKid').onsubmit = async e => { e.preventDefault(); const n=$('#newKid').value.trim(); if(!n) return;
+    const r = await rpc('np_parent_add_kid', {p_code:state.code, p_pin:state.pin, p_name:n});
+    if(r.error) return toast(r.error==='too_many'?'10 kids max':'Check the name');
+    state.family = await rpc('np_get_family',{p_code:state.code}); await refreshParent(); toast(n+' added!'); };
+  $('#copyCode').onclick = async ()=>{ try{ await navigator.clipboard.writeText(state.code); toast('Code copied!'); }catch(e){ toast('Code: '+state.code); } };
+  $('#lock').onclick = async ()=>{ state.pin=null; state.parent=null; state.family = await rpc('np_get_family',{p_code:state.code}); familyView(); };
+}
+
+function confirmBox(msg, onYes){
+  const m = document.createElement('div'); m.className='modal';
+  m.innerHTML = `<div class="card center"><p style="font-size:1.2rem;font-weight:600">${esc(msg)}</p>
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="no">Cancel</button><button class="btn" id="yes">Yes</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelector('#no').onclick = ()=>m.remove();
+  m.querySelector('#yes').onclick = async ()=>{ m.remove(); try{ await onYes(); }catch(e){ toast('Something went wrong.'); } };
+}
+
+/* ---------- start ---------- */
+if(state.code) openFamily(state.code).then(()=>{ if(!state.family) homeView(); }); else homeView();
+</script>
+</body>
+</html>
