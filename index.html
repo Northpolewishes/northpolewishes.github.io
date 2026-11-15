@@ -328,6 +328,7 @@ Object.assign(I18N.en, {
   errAlreadyRevealed:"Someone already opened their person, so you can't redraw.", errDrawn:'Names are already drawn.',
   ssShareText:'Join our Secret Santa! Tap the link, add your name, and pick a PIN. Group code: {code}.', ssRemoveConfirm:'Remove {name}?',
   drawnToast:'Names drawn! Tell everyone to open their person.',
+  changePin:'Change My PIN', newPinPrompt:'Pick a new PIN (4 to 6 numbers)',
   linkPh:'Store link (optional)', viewLink:'Link', shopIt:'Shop it'
 });
 Object.assign(I18N.es, {
@@ -362,6 +363,7 @@ Object.assign(I18N.es, {
   errAlreadyRevealed:'Alguien ya vio a quién le tocó, así que no se puede volver a sortear.', errDrawn:'Los nombres ya se sortearon.',
   ssShareText:'¡Únete a nuestro Amigo Secreto! Toca el enlace, escribe tu nombre y elige un PIN. Código: {code}.', ssRemoveConfirm:'¿Quitar a {name}?',
   drawnToast:'¡Nombres sorteados! Diles a todos que vean a quién les tocó.',
+  changePin:'Cambiar Mi PIN', newPinPrompt:'Elige un PIN nuevo (4 a 6 números)',
   linkPh:'Enlace (opcional)', viewLink:'Enlace', shopIt:'Ver en tienda'
 });
 let LANG = (store.get('np_lang') || ((navigator.language||'').toLowerCase().startsWith('es') ? 'es' : 'en'));
@@ -599,6 +601,13 @@ function confirmBox(msg, onYes){
   m.querySelector('#yes').onclick = async ()=>{ m.remove(); try{ await onYes(); }catch(e){ toast(t('somethingWrong')); } };
 }
 
+function changePin(fn, args, onOk){
+  pinPrompt(t('newPinPrompt'), async v => {
+    const r = await rpc(fn, Object.assign({p_new_pin:v}, args));
+    if(r.error) return toast(r.error==='locked' ? t('locked') : t('unlockAgain'));
+    onOk(v); toast(t('pinChanged'));
+  });
+}
 function pinPrompt(msg, onPin){
   const m = document.createElement('div'); m.className='modal';
   m.innerHTML = `<div class="card center"><p style="font-size:1.15rem;font-weight:600">${esc(msg)}</p>
@@ -891,6 +900,7 @@ async function parentView(keepScroll){
         <button class="link" data-rmad="${a.id}" data-name="${esc(a.name)}" style="color:#b33;font-size:.9rem">${t('orgRemove')}</button></div>`).join('')}</div>` : ''}
     <div class="stack" style="margin-top:18px">
       <button class="btn gold block" id="shareLink">${t('shareLink')} (${esc(state.code)})</button>
+      <button class="btn ghost block" id="chPin">${t('changePin')}</button>
       <button class="btn block" id="lock">${t('lockReturn')}</button>
     </div>
   </div>`;
@@ -913,6 +923,7 @@ async function parentView(keepScroll){
     if(r.error) return toast(r.error==='too_many'?t('max10'):t('checkName'));
     state.family = await rpc('np_get_family',{p_code:state.code}); await refreshParent(); toast(t('added',{name:n})); };
   $('#shareLink').onclick = ()=>shareFamily(state.code);
+  $('#chPin').onclick = () => changePin('np_parent_change_pin', {p_code:state.code, p_pin:state.pin}, v => { state.pin = v; });
   $('#lock').onclick = async ()=>{ state.pin=null; state.parent=null; state.family = await rpc('np_get_family',{p_code:state.code}); familyView(); };
 }
 
@@ -1017,7 +1028,7 @@ async function adultView(haveData){
           <span class="it">${esc(w.item)}${linkBtn(w.link, t('shopIt'))}<span class="dt">${t('asked',{d:fmtDay(w.created_at)})}</span></span></div>`).join('')
           : `<p style="color:#8a7a5a">${t('noAdultWishes')}</p>`}
       </div>` : ''}
-    <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
+    <div class="stack" style="margin-top:18px"><button class="btn ghost block" id="chPin">${t('changePin')}</button><button class="btn block" id="lock">${t('lock')}</button></div>
   </div>`;
   if(haveData) scrollTo({top:0,behavior:'smooth'}); else scrollTo(0,y);
   const sendBtn = $('#sendBtn');
@@ -1047,6 +1058,7 @@ async function adultView(haveData){
     try{ const r = await rpc('np_adult_set_bought', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin, p_wish:cb.dataset.w, p_bought:cb.checked}); if(r.error) throw 0; }
     catch(e){ toast(t('couldNotSave')); cb.checked=!cb.checked; cb.closest('.pw').classList.toggle('bought', cb.checked); }
   });
+  $('#chPin').onclick = () => changePin('np_adult_change_pin', {p_code:state.code, p_adult:a.id, p_pin:state.adultPin}, v => { state.adultPin = v; });
   $('#lock').onclick = () => { state.adult=null; state.adultPin=null; state.adultData=null; state.adultPending=[]; adultsView(); };
 }
 
@@ -1218,7 +1230,7 @@ async function memberView(data){
     <ul class="wish-list" style="font-family:Fredoka" id="wl">
       ${data.wishes.map(w=>`<li style="font-family:Fredoka;font-size:1.15rem"><span class="star">★</span><span>${esc(w.item)}${linkBtn(w.link)}</span><button class="x" data-del="${w.id}" aria-label="X">✕</button></li>`).join('')}
     </ul>${wishFormHtml('')}
-    <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
+    <div class="stack" style="margin-top:18px"><button class="btn ghost block" id="chPin">${t('changePin')}</button><button class="btn block" id="lock">${t('lock')}</button></div>
   </div>`);
   if(data.drawn) $('#reveal').onclick = () => { unlockAudio(); revealScene(data); };
   $('#wishForm').onsubmit = async e => { e.preventDefault(); const w = readWish(); if(!w) return;
@@ -1226,6 +1238,7 @@ async function memberView(data){
     if(r.error) return toast(t('unlockAgain')); memberView(); };
   view.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
     await rpc('ss_member_delete_wish', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin, p_wish:b.dataset.del}); memberView(); });
+  $('#chPin').onclick = () => changePin('ss_member_change_pin', {p_code:state.ssCode, p_member:m.id, p_pin:state.ssPin}, v => { state.ssPin = v; });
   $('#lock').onclick = groupView;
 }
 
@@ -1315,7 +1328,7 @@ async function orgView(data){
       <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="sLock" ${data.signups_locked?'checked':''} ${data.drawn?'disabled':''} style="width:24px;height:24px"> ${t('orgLockSignups')}</label>
       <button class="btn green" id="saveSettings">${t('save')}</button>
     </div>
-    <div class="stack" style="margin-top:18px"><button class="btn block" id="lock">${t('lock')}</button></div>
+    <div class="stack" style="margin-top:18px"><button class="btn ghost block" id="chPin">${t('changePin')}</button><button class="btn block" id="lock">${t('lock')}</button></div>
   </div>`;
   scrollTo(0, data._top ? 0 : y);
   const org = (fn, args) => rpc(fn, Object.assign({p_code:state.ssCode, p_pin:state.orgPin}, args));
@@ -1339,6 +1352,7 @@ async function orgView(data){
   $('#saveSettings').onclick = async () => {
     const r = await org('ss_org_update', {p_budget:$('#sBudget').value, p_date:$('#sDate').value || null, p_locked:$('#sLock').checked});
     toast(r.error ? errMsg(r.error) : t('saved')); orgView(); };
+  $('#chPin').onclick = () => changePin('ss_org_change_pin', {p_code:state.ssCode, p_pin:state.orgPin}, v => { state.orgPin = v; });
   $('#lock').onclick = () => { state.orgPin = null; groupView(); };
 }
 
